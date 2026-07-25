@@ -42,6 +42,24 @@ Test ohne echte Daten:
 python3 scripts/whoop_analyse.py tracking/whoop-daten-vorlage.csv
 ```
 
+### Nur ein Zeitfenster auswerten
+
+Ein Whoop-Export reicht oft Monate zurück. Fürs eigentliche Thema (der
+**jüngste** Schlafeinbruch) zählt das aktuelle Fenster – deshalb filtern:
+
+```bash
+# nur die letzten 14 Tage
+python3 scripts/whoop_analyse.py physiological_cycles.csv --last 14
+
+# ab einem Datum / bis zu einem Datum (auch kombinierbar)
+python3 scripts/whoop_analyse.py physiological_cycles.csv --since 2026-06-01
+python3 scripts/whoop_analyse.py physiological_cycles.csv --since 2025-12-01 --until 2026-01-31
+```
+
+Ein aktuelles Fenster mit einem früheren „guten" Fenster zu vergleichen zeigt,
+ob der Zusammenhang Schlaf↔Recovery zuletzt **enger** geworden ist – also ob dem
+Körper der Puffer ausgeht.
+
 ## Was das Skript rechnet
 
 | Kennzahl | Frage, die sie beantwortet |

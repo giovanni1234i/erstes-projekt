@@ -172,6 +172,33 @@ def lade_daten(pfad, args):
 # Statistik (Standardbibliothek)
 # --------------------------------------------------------------------------- #
 
+def _fenster(zeilen, meta, args):
+    """Filtert die Zeilen auf ein Zeitfenster (--since/--until/--last)."""
+    braucht_datum = args.since or args.until or args.last
+    if braucht_datum and not meta["sortiert"]:
+        sys.exit("Fehler: Zeitfilter (--since/--until/--last) verlangt eine "
+                 "erkennbare Datumsspalte. Bitte --date-col angeben.")
+
+    if args.since:
+        d = _zu_datum(args.since)
+        if d is None:
+            sys.exit(f"Fehler: --since Datum ungueltig: {args.since}")
+        zeilen = [z for z in zeilen if z["datum"] >= d]
+    if args.until:
+        d = _zu_datum(args.until)
+        if d is None:
+            sys.exit(f"Fehler: --until Datum ungueltig: {args.until}")
+        # bis Ende des Tages einschliessen
+        zeilen = [z for z in zeilen if z["datum"].date() <= d.date()]
+    if args.last:
+        zeilen = zeilen[-args.last:]
+
+    meta["fenster"] = None
+    if zeilen and meta["sortiert"]:
+        meta["fenster"] = (zeilen[0]["datum"].date(), zeilen[-1]["datum"].date())
+    return zeilen
+
+
 def _paare(zeilen, key_x, key_y):
     return [
         (z[key_x], z[key_y])
@@ -269,7 +296,10 @@ def berichte(zeilen, meta):
     print("=" * 72)
     print("  WHOOP-AUSWERTUNG  ·  Schlaf <-> Recovery <-> Strain")
     print("=" * 72)
-    print(f"  Zeilen gelesen: {n}")
+    print(f"  Zeilen ausgewertet: {n}")
+    fenster = meta.get("fenster")
+    if fenster:
+        print(f"  Zeitraum:       {fenster[0]}  bis  {fenster[1]}")
     print(f"  Schlafspalte:   {meta['sleep_col']}  (Einheit: {meta['einheit']})")
     print(f"  Recovery:       {meta['recovery_col']}")
     print(f"  Strain:         {meta['strain_col']}")
@@ -361,6 +391,12 @@ def main(argv=None):
     p.add_argument("--date-col", help="Name der Datums-/Startzeit-Spalte")
     p.add_argument("--sleep-unit", choices=["min", "h"],
                    help="Einheit der Schlafspalte (Standard: automatisch)")
+    p.add_argument("--last", type=int, metavar="N",
+                   help="Nur die letzten N Tage (nach Datum) auswerten")
+    p.add_argument("--since", metavar="YYYY-MM-DD",
+                   help="Nur Zeilen ab diesem Datum (inkl.)")
+    p.add_argument("--until", metavar="YYYY-MM-DD",
+                   help="Nur Zeilen bis zu diesem Datum (inkl.)")
     args = p.parse_args(argv)
 
     try:
@@ -370,6 +406,10 @@ def main(argv=None):
 
     if not zeilen:
         sys.exit("Fehler: Keine Datenzeilen gefunden.")
+
+    zeilen = _fenster(zeilen, meta, args)
+    if not zeilen:
+        sys.exit("Fehler: Nach dem Zeitfilter bleiben keine Zeilen uebrig.")
 
     berichte(zeilen, meta)
 
