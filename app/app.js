@@ -56,6 +56,13 @@
   };
 
   // ---------- Root ----------
+  // ---- Theme (Standard: dunkel = Whoop-Look), pro Gerät gespeichert ----
+  const THEME_KEY = "ernaehrung_theme";
+  function applyTheme(t) { document.documentElement.dataset.theme = t; try { localStorage.setItem(THEME_KEY, t); } catch (e) {} }
+  let theme = "dark";
+  try { theme = localStorage.getItem(THEME_KEY) || "dark"; } catch (e) {}
+  applyTheme(theme);
+
   const app = document.createElement("div");
   app.className = "app";
   app.innerHTML = `
@@ -64,7 +71,10 @@
         <h1 id="title">Heute</h1>
         <div class="sub" id="subtitle">Ernährung · Meier G. <span id="syncbadge"></span></div>
       </div>
-      <button class="icon-btn" data-action="profile" title="Profil & Einstellungen">⚙︎</button>
+      <div class="row" style="gap:8px">
+        <button class="icon-btn" data-action="theme" id="themebtn" title="Hell / Dunkel">${theme === "dark" ? "🌙" : "☀️"}</button>
+        <button class="icon-btn" data-action="profile" title="Profil & Einstellungen">⚙︎</button>
+      </div>
     </header>
     <main id="view"></main>
     <nav class="tabs" id="tabs"></nav>
@@ -735,6 +745,12 @@
       case "clear-checked": S.clearCheckedShopping(); renderEinkauf(); break;
 
       // Profil
+      case "theme": {
+        theme = document.documentElement.dataset.theme === "dark" ? "light" : "dark";
+        applyTheme(theme);
+        const tb = $("#themebtn", app); if (tb) tb.textContent = theme === "dark" ? "🌙" : "☀️";
+        break;
+      }
       case "profile": modalProfile(); break;
       case "save-profile": saveProfile(); break;
       case "save-weight": saveWeight(); break;

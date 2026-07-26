@@ -227,6 +227,36 @@ nav.tabs button.on::before{content:""; position:absolute; top:0; width:26px; hei
 /* ---- Sparkline ---- */
 .spark{width:100%; height:60px; display:block}
 
+/* ---- Desktop-Layout: Navigation als Seitenleiste ---- */
+@media (min-width:820px){
+  body{ padding-bottom:0; padding-left:236px; }
+  .app{ max-width:820px; padding:0 26px; }
+  header.top{ padding-top:24px; }
+
+  nav.tabs{
+    top:0; bottom:0; left:0; right:auto; width:236px; height:100vh;
+    flex-direction:column; align-items:stretch; justify-content:flex-start; gap:5px;
+    padding:24px 16px; border-top:none; border-right:1px solid var(--border);
+    background:var(--surface); backdrop-filter:none;
+  }
+  nav.tabs::before{
+    content:"🥗 Ernährung"; display:block; font:800 17px/1 var(--font);
+    letter-spacing:-.02em; color:var(--ink); padding:8px 12px 20px;
+  }
+  nav.tabs button{
+    flex:none; flex-direction:row; justify-content:flex-start; gap:13px;
+    width:100%; padding:12px 14px; border-radius:12px; font-size:14.5px; font-weight:600;
+  }
+  nav.tabs button .ic{ height:auto; }
+  nav.tabs button .ic svg{ width:21px; height:21px; }
+  nav.tabs button:hover{ background:var(--surface-2); }
+  nav.tabs button.on{ background:var(--accent-soft); color:var(--accent-ink); }
+  nav.tabs button.on::before{ display:none; }
+}
+@media (min-width:1180px){
+  .app{ max-width:900px; }
+}
+
 @keyframes fade{from{opacity:0}to{opacity:1}}
 @keyframes sheet{from{transform:translateY(24px); opacity:.4}to{transform:none; opacity:1}}
 .rise{opacity:0; transform:translateY(10px); animation:rise .5s cubic-bezier(.2,.7,.3,1) forwards}
