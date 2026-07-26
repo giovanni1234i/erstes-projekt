@@ -13,7 +13,8 @@
 <body>
   <!-- App wird von app.js in <body> gerendert -->
   <script src="vendor/supabase.js"></script>
-  <script src="config.local.js" onerror="/* optional: ohne Sync läuft die App lokal */"></script>
+  <script src="config.local.js" onerror="/* optional: lokaler Override, sonst config.js */"></script>
+  <script src="config.js"></script>
   <script src="data.js"></script>
   <script src="store.js"></script>
   <script src="sync.js"></script>
