@@ -32,11 +32,11 @@ window.NUTRI_DATA = {
   // An 21:00-Slot-Tagen (Mo/Mi/Fr) steht im Snack-2-Slot der koffeinfreie
   // Pre-Slot-Boost statt eines Energy Drinks. Werte = Rezeptnamen.
   weekPlan: {
-    "Mo": { "Frühstück":"Brot mit Hüttenkäse", "Snack 1":"Quark-Bowl", "Mittag":"Safran-Risotto mit Poulet", "Snack 2":"Pre-Slot-Boost (koffeinfrei)", "Abend":"Pasta mit Fleischstück", "Shake":"Gainer-Shake" },
+    "Mo": { "Frühstück":"Brot mit Hüttenkäse", "Snack 1":"Quark-Bowl", "Mittag":"Safran-Risotto mit Poulet", "Snack 2":"Skyr mit Granola & Honig", "Abend":"Pasta mit Fleischstück", "Shake":"Gainer-Shake" },
     "Di": { "Frühstück":"Power Oats", "Snack 1":"Wrap mit Ei & Käse", "Mittag":"Hähnchen-Reisbowl", "Snack 2":"Quark-Bowl", "Abend":"Lachs mit Reis", "Shake":"Bananen-Beeren-Shake" },
-    "Mi": { "Frühstück":"Overnight Oats to go", "Snack 1":"Quark-Bowl", "Mittag":"Pasta Pesto mit Poulet", "Snack 2":"Pre-Slot-Boost (koffeinfrei)", "Abend":"Süsskartoffel + Hackfleisch", "Shake":"Gainer-Shake" },
+    "Mi": { "Frühstück":"Overnight Oats to go", "Snack 1":"Quark-Bowl", "Mittag":"Pasta Pesto mit Poulet", "Snack 2":"Reiswaffeln mit Erdnussbutter & Banane", "Abend":"Süsskartoffel + Hackfleisch", "Shake":"Gainer-Shake" },
     "Do": { "Frühstück":"Brot mit Hüttenkäse", "Snack 1":"Wrap mit Ei & Käse", "Mittag":"Thunfisch-Pasta", "Snack 2":"Quark-Bowl", "Abend":"Grill: Poulet + Kartoffeln", "Shake":"Bananen-Beeren-Shake" },
-    "Fr": { "Frühstück":"Power Oats", "Snack 1":"Quark-Bowl", "Mittag":"Hähnchen-Reisbowl", "Snack 2":"Pre-Slot-Boost (koffeinfrei)", "Abend":"Hackfleisch-Pasta (Bolo)", "Shake":"Gainer-Shake" },
+    "Fr": { "Frühstück":"Power Oats", "Snack 1":"Quark-Bowl", "Mittag":"Hähnchen-Reisbowl", "Snack 2":"Skyr mit Granola & Honig", "Abend":"Hackfleisch-Pasta (Bolo)", "Shake":"Gainer-Shake" },
     "Sa": { "Frühstück":"Brot mit Hüttenkäse", "Snack 1":"Wrap mit Ei & Käse", "Mittag":"Grill: Lachs + Reis", "Snack 2":"Quark-Bowl", "Abend":"Pasta mit Fleischstück", "Shake":"Gainer-Shake" },
     "So": { "Frühstück":"Overnight Oats to go", "Snack 1":"Quark-Bowl", "Mittag":"Safran-Risotto mit Poulet", "Snack 2":"Bananen-Beeren-Shake", "Abend":"Lachs mit Reis", "Shake":"Gainer-Shake" },
   },
@@ -316,7 +316,7 @@ window.NUTRI_DATA = {
         {name:"Honig", amount:15, unit:"g"},
         {name:"Kreatin", amount:5, unit:"g"},
       ],
-      instructions:"Vor dem 21:00-Slot STATT Energy Drink: schnelle Kohlenhydrate für Power, KEIN Koffein → schützt den Schlaf. Kreatin-Timing ist egal." },
+      instructions:"Vor einer intensiven Nachmittags-Einheit als schneller Kohlenhydrat-Boost – koffeinfrei, damit dein Schlaf (Ziel 22:00) geschützt bleibt. Kreatin-Timing egal." },
 
     // ===== Pancakes (mehrere Varianten – tippe 'pancakes' in die Suche) =====
     { name:"Protein-Pancakes", slot:"Frühstück", prep_min:12, servings:1, is_favorite:true,

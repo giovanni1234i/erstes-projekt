@@ -26,9 +26,13 @@
 - **Wiege-Erinnerung** in der App (1×/Woche, Heute-Tab, wenn ~7 T kein Eintrag).
 - **Fokus: „Kraft fürs Eis"** – Zunahme soll sich in Kraft/Explosivität übersetzen.
 - Alkohol selten/nie · kein grosser Gemüse-Esser · Treats zweitrangig.
-- **Trainingsplan:** meist gleich; Abstimmung läuft über den Chat (kein eigener
-  App-Tab gewünscht). Sobald der reale Plan da ist: `weekPlan` in `data.js`
-  daran ausrichten (Trainings-/Ruhetage, Timing, 21:00-Slots → Pre-Slot-Boost).
+- **Trainingsplan (KW31, meist gleich):** Training ist TAGSÜBER – Testing
+  morgens + Ice ~14:15 (Fr 13:30) + Kraft Fr morgens. KEINE Abend-Trainings!
+  Die Namensliste unten im Teamplan sind nur GRUPPEN-Einteilungen, keine
+  Slots. Abende sind frei.
+- **Schlaf:** Wunsch = unter der Woche 22:00 → 07:30 (9.5 h), Wochenende 23:00→
+  08:00. Kein Koffein nach ~14:00; Energydrink nur vor Morgeneinheiten.
+- Abstimmung läuft über den Chat (kein eigener App-Tab gewünscht).
 - **Whoop-Daten bleiben** (localStorage + Supabase nach Login); Deploys löschen
   keine Nutzerdaten.
 
