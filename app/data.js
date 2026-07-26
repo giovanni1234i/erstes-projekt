@@ -62,6 +62,12 @@ window.NUTRI_DATA = {
     { name:"Avocado",                kcal:240, protein:3,   carbs:12, fat:22,  basis:"Stk" },
     { name:"Mandeln",                kcal:580, protein:21,  carbs:20, fat:50,  basis:"100g" },
     { name:"Cashew",                 kcal:553, protein:18,  carbs:30, fat:44,  basis:"100g" },
+
+    // --- Auswärts / Clubrestaurant (Schätzwerte pro Teller, editierbar) ---
+    { name:"Auswärts: Teller normal",        kcal:850,  protein:45, carbs:85,  fat:32, basis:"Stk", category:"Auswärts" },
+    { name:"Auswärts: Teller gross",         kcal:1100, protein:55, carbs:110, fat:42, basis:"Stk", category:"Auswärts" },
+    { name:"Auswärts: Pasta-Teller",         kcal:1000, protein:35, carbs:130, fat:32, basis:"Stk", category:"Auswärts" },
+    { name:"Auswärts: Fleisch + Beilagen",   kcal:950,  protein:55, carbs:80,  fat:38, basis:"Stk", category:"Auswärts" },
   ],
 
   /* ---- Rezepte ----

@@ -140,8 +140,20 @@ Sync an, sobald die Keys da sind.
   umgestellt – der Rest der App bleibt gleich.
 - **Phase 3 – Feinschliff:** Menüplan an deine Trainingszeiten koppeln,
   Meal-Prep-Liste (So ~60 Min), Rezepte-Editor, mehr Nährwerte.
+- **Phase 3b – Foto-Analyse in der App:** Foto von Quittung/Teller →
+  automatische Erkennung von Lebensmitteln/kcal. Braucht einen kleinen
+  Backend-Endpunkt (Vercel-Function) + einen **Anthropic-API-Key** (als
+  Server-Env-Variable, nicht im Client; Kosten pro Analyse gering). Bis dahin:
+  Fotos **im Chat** an Claude schicken → Analyse + Meals kommen zurück.
 - **Phase 4 – Deploy:** als private Web-App hosten (Vercel) → dein Handy-Link,
   Homescreen- und offline-fähig.
+
+### Bereits berücksichtigt
+- **Clubrestaurant-Mittag:** In der App gibt es beim Eintragen den Modus
+  „🍽 Auswärts" (Name + geschätzte kcal, Makros optional) plus „Auswärts"-
+  Presets. So wird der Mittag nicht als Koch-Rezept geplant.
+- **Meals generieren:** Claude kann dir jederzeit Wochenpläne/Rezepte bauen
+  (im Chat) – rund um deinen Clubrestaurant-Mittag.
 
 **Geplanter Stack:** schlanke Single-Page-App (HTML/JS) · Supabase-JS-Client ·
 Deploy auf Vercel · Nährwerte aus einer eingebauten Lebensmittel-Tabelle

@@ -326,6 +326,7 @@
       <div class="chips" style="margin-bottom:14px">
         <button class="chip on" data-action="mode-food" id="m-food">Lebensmittel</button>
         <button class="chip" data-action="mode-recipe" id="m-recipe">Rezept</button>
+        <button class="chip" data-action="mode-est" id="m-est">🍽 Auswärts</button>
       </div>
       <label class="field"><span class="l">Slot</span>
         <select id="af-slot">${D.slots.map(s => `<option ${s === slot ? "selected" : ""}>${esc(s)}</option>`).join("")}</select></label>
@@ -343,6 +344,19 @@
           <select id="af-recipe">${recipes.map(r => `<option value="${r.id}">${esc(r.name)} (${r0(r.kcal)} kcal)</option>`).join("")}</select></label>
       </div>
 
+      <div id="pane-est" style="display:none">
+        <label class="field"><span class="l">Was hast du gegessen?</span>
+          <input type="text" id="est-name" placeholder="z.B. Clubrestaurant: Poulet, Reis, Salat"></label>
+        <label class="field"><span class="l">Kalorien (Schätzung)</span>
+          <input type="number" id="est-kcal" value="900" min="0" step="50"></label>
+        <div class="grid2">
+          <label class="field"><span class="l">Protein g <span class="faint">(optional)</span></span><input type="number" id="est-p" placeholder="–"></label>
+          <label class="field"><span class="l">Kohlenh. g <span class="faint">(optional)</span></span><input type="number" id="est-c" placeholder="–"></label>
+          <label class="field"><span class="l">Fett g <span class="faint">(optional)</span></span><input type="number" id="est-f" placeholder="–"></label>
+        </div>
+        <div class="hint">Mittag im Clubrestaurant? Name + geschätzte kcal reichen. Oder oben ein „Auswärts"-Preset unter Lebensmittel wählen. Genauer geht's per Foto im Chat.</div>
+      </div>
+
       <button class="btn block" data-action="save-food" style="margin-top:6px">Eintragen</button>`);
 
     const foodSel = $("#af-food", app), amt = $("#af-amount", app), unit = $("#af-unit", app), prev = $("#af-preview", app);
@@ -356,6 +370,16 @@
     foodSel.addEventListener("change", refresh);
     amt.addEventListener("input", refresh);
     refresh();
+  }
+
+  function setAddMode(mode) {
+    const panes = { food: "#pane-food", recipe: "#pane-recipe", est: "#pane-est" };
+    const chips = { food: "#m-food", recipe: "#m-recipe", est: "#m-est" };
+    Object.keys(panes).forEach(k => {
+      const pane = $(panes[k], app), chip = $(chips[k], app);
+      if (pane) pane.style.display = k === mode ? "" : "none";
+      if (chip) chip.classList.toggle("on", k === mode);
+    });
   }
 
   function macroForFood(f, amount) {
@@ -462,10 +486,9 @@
 
       // Heute: Essen
       case "add-food": modalAddFood(el.dataset.slot || D.slots[0]); break;
-      case "mode-food": $("#pane-food", app).style.display = ""; $("#pane-recipe", app).style.display = "none";
-        $("#m-food", app).classList.add("on"); $("#m-recipe", app).classList.remove("on"); break;
-      case "mode-recipe": $("#pane-food", app).style.display = "none"; $("#pane-recipe", app).style.display = "";
-        $("#m-recipe", app).classList.add("on"); $("#m-food", app).classList.remove("on"); break;
+      case "mode-food": setAddMode("food"); break;
+      case "mode-recipe": setAddMode("recipe"); break;
+      case "mode-est": setAddMode("est"); break;
       case "save-food": saveFoodFromModal(); break;
       case "del-item": S.removeLogItem(state.date, id); renderHeute(); break;
       case "log-recipe": logRecipe(id); break;
@@ -522,7 +545,16 @@
   function saveFoodFromModal() {
     const slot = $("#af-slot", app).value;
     const recipeMode = $("#pane-recipe", app).style.display !== "none";
-    if (recipeMode) {
+    const estMode = $("#pane-est", app).style.display !== "none";
+    if (estMode) {
+      const name = ($("#est-name", app).value || "").trim() || "Auswärts (Schätzung)";
+      const kcal = +$("#est-kcal", app).value || 0;
+      S.addLogItem(state.date, {
+        slot, name,
+        kcal, protein: +$("#est-p", app).value || 0,
+        carbs: +$("#est-c", app).value || 0, fat: +$("#est-f", app).value || 0,
+      });
+    } else if (recipeMode) {
       const rid = $("#af-recipe", app).value;
       const r = S.getRecipe(rid); if (!r) return;
       S.addLogItem(state.date, { slot, name: r.name, kcal: r.kcal, protein: r.protein, carbs: r.carbs, fat: r.fat, recipe_id: r.id });
