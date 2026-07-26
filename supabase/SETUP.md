@@ -37,3 +37,37 @@ Sobald deine zwei Werte da sind, trage ich sie in die App ein
 E-Mail-Login (Magic-Link) und schalte den Geräte-Sync scharf. Die echten
 Zugangsdaten kommen in eine lokale Datei, die per `.gitignore` **nicht**
 ins Repo gepusht wird.
+
+---
+
+## Sync aktivieren (Phase 2) – deine To-dos
+
+Der Sync-Code ist eingebaut (`app/sync.js`). Damit er live geht, drei Schritte
+in deinem Supabase-Projekt + eine lokale Datei:
+
+1. **Schema (neu) ausführen:** SQL Editor → Inhalt von [`schema.sql`](schema.sql)
+   erneut einfügen → RUN. Es enthält jetzt zusätzlich die Sync-Tabelle
+   `app_state` (idempotent, doppelt ausführen ist ok).
+
+2. **Login-URLs erlauben:** **Authentication → URL Configuration**
+   - *Site URL:* `http://localhost:8000`
+   - *Redirect URLs* (hinzufügen): `http://localhost:8000` und – später, nach
+     dem Deploy – deine echte App-URL. Ohne das funktioniert der Magic-Link nicht.
+   - E-Mail-Login ist standardmässig aktiv (Provider „Email").
+
+3. **Lokale Config anlegen:** im Ordner `app/` eine Datei `config.local.js`
+   mit deinen Werten (Vorlage: [`../app/config.example.js`](../app/config.example.js)).
+   Diese Datei ist per `.gitignore` geschützt und wird nie gepusht.
+
+**Testen:**
+```bash
+cd app
+python3 -m http.server 8000
+# Browser: http://localhost:8000  →  ⚙︎ Profil → E-Mail eingeben → „Link senden"
+# Mail öffnen, Link auf demselben Gerät anklicken → oben steht „✓ Sync"
+```
+Danach auf einem zweiten Gerät gleich einloggen → dieselben Daten.
+
+> Hinweis: Aus der Cloud-Umgebung von Claude ist supabase.co gesperrt
+> (Netzwerk-Policy), daher wird der Login auf **deinem** Gerät getestet, nicht
+> hier. Wenn etwas klemmt, schick mir die Fehlermeldung.

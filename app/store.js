@@ -8,6 +8,7 @@ window.Store = (function () {
   const D = window.NUTRI_DATA;
 
   const blank = () => ({
+    _updatedAt: 0,
     settings: { ...D.defaults },
     pantry: [],                 // [{id,name,quantity,unit,category}]
     foods: D.foods.map(withId), // Nährwerte (seed, editierbar)
@@ -24,22 +25,27 @@ window.Store = (function () {
   function withId(o) { return { id: uid(), ...o }; }
 
   let state = load();
+  const changeCbs = [];
 
+  function save() {
+    try { localStorage.setItem(KEY, JSON.stringify(state)); }
+    catch (e) { console.error("Store: Speichern fehlgeschlagen (Speicher voll?)", e); }
+  }
   function load() {
     try {
       const raw = localStorage.getItem(KEY);
-      if (!raw) { const s = blank(); persist(s); return s; }
-      const parsed = JSON.parse(raw);
-      // sanfte Migration: fehlende Felder aus blank() ergänzen
-      return Object.assign(blank(), parsed);
+      if (!raw) { const s = blank(); try { localStorage.setItem(KEY, JSON.stringify(s)); } catch (e) {} return s; }
+      return Object.assign(blank(), JSON.parse(raw)); // sanfte Migration
     } catch (e) {
       console.warn("Store: konnte nicht laden, starte frisch.", e);
-      const s = blank(); persist(s); return s;
+      const s = blank(); try { localStorage.setItem(KEY, JSON.stringify(s)); } catch (e2) {} return s;
     }
   }
-  function persist(s) {
-    try { localStorage.setItem(KEY, JSON.stringify(s || state)); }
-    catch (e) { console.error("Store: Speichern fehlgeschlagen (Speicher voll?)", e); }
+  // Persistiert nach jeder lokalen Änderung + benachrichtigt Sync (notify).
+  function persist(notify) {
+    state._updatedAt = Date.now();
+    save();
+    if (notify !== false) changeCbs.forEach(fn => { try { fn(state); } catch (e) {} });
   }
 
   // --- generische Helfer ---
@@ -119,6 +125,15 @@ window.Store = (function () {
     exportJSON: () => JSON.stringify(state, null, 2),
     importJSON: (raw) => { state = Object.assign(blank(), JSON.parse(raw)); persist(); },
     reset: () => { state = blank(); persist(); },
+
+    // Sync-Anbindung
+    onChange: (fn) => { if (typeof fn === "function") changeCbs.push(fn); },
+    snapshot: () => state,
+    stamp: () => state._updatedAt || 0,
+    applyRemote: (data) => {           // von Sync: Remote-Stand übernehmen, OHNE erneut zu pushen
+      state = Object.assign(blank(), data || {});
+      save();
+    },
   };
 
   function sameName(a, b) {

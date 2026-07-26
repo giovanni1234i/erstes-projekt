@@ -36,10 +36,21 @@ Auf dem Handy zum Homescreen hinzufügen → verhält sich wie eine App.
 
 - **Phase 1:** alles lokal im Browser (`localStorage`). Kein Konto nötig.
   Sichere deine Daten über **Profil → Export**.
-- **Phase 2 (Sync):** sobald die Supabase-Zugangsdaten da sind
-  (siehe [`../supabase/SETUP.md`](../supabase/SETUP.md)), wird der
-  Datenzugriff in `store.js` auf Supabase umgestellt → Echtzeit-Sync über
-  Geräte. Der Rest der App bleibt unverändert.
+- **Phase 2 (Sync):** eingebaut in `sync.js`. Login per E-Mail-Magic-Link,
+  der ganze Zustand wird als JSON in der Supabase-Tabelle `app_state`
+  synchronisiert (Realtime + Pull beim Öffnen). Aktivieren: `app/config.local.js`
+  anlegen (Vorlage `config.example.js`) und die Schritte in
+  [`../supabase/SETUP.md`](../supabase/SETUP.md) befolgen. Ohne Config/Login
+  läuft die App normal lokal weiter.
+
+## Aufbau (Sync)
+
+```
+app/
+  vendor/supabase.js  – Supabase-Client (vendored, kein CDN nötig)
+  config.local.js     – deine Supabase-URL + Key (NICHT im Repo)
+  sync.js             – Auth + Geräte-Sync über app_state
+```
 
 ## Aufbau
 

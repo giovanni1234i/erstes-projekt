@@ -161,6 +161,20 @@ create policy food_upd   on food_db for update using (auth.uid() = user_id);
 create policy food_del   on food_db for delete using (auth.uid() = user_id);
 
 -- =====================================================================
---  Fertig. Nährwert-Basisdaten und Start-Rezepte werden später von der
---  App befüllt (sobald deine Antworten da sind).
+--  Geräte-Sync: gesamter App-Zustand als 1 JSON-Zeile pro Nutzer
+--  (einfach & robust für eine Ein-Personen-App; Last-Write-Wins).
+-- =====================================================================
+create table if not exists app_state (
+  user_id    uuid primary key references auth.users(id) on delete cascade,
+  data       jsonb not null default '{}'::jsonb,
+  updated_at timestamptz not null default now()
+);
+alter table app_state enable row level security;
+drop policy if exists own_state on app_state;
+create policy own_state on app_state for all
+  using (auth.uid() = user_id) with check (auth.uid() = user_id);
+
+-- =====================================================================
+--  Fertig. Nährwert-Basisdaten und Start-Rezepte kommen aus der App
+--  (app/data.js) und werden pro Gerät synchronisiert.
 -- =====================================================================

@@ -62,7 +62,7 @@
     <header class="top">
       <div>
         <h1 id="title">Heute</h1>
-        <div class="sub" id="subtitle">Ernährung · Meier G.</div>
+        <div class="sub" id="subtitle">Ernährung · Meier G. <span id="syncbadge"></span></div>
       </div>
       <button class="icon-btn" data-action="profile" title="Profil & Einstellungen">⚙︎</button>
     </header>
@@ -415,7 +415,7 @@
     openModal(`
       <div class="mh"><h3>Profil & Ziele</h3><button class="icon-btn" data-action="close">✕</button></div>
 
-      <div class="banner">🔌 Geräte-Sync (Supabase) ist noch nicht aktiv – die App speichert aktuell lokal auf diesem Gerät. Sichere deine Daten unten per Backup.</div>
+      <div id="sync-section"></div>
 
       <div class="grid2">
         <label class="field"><span class="l">Gewicht (kg)</span><input type="number" id="p-wc" value="${s.weight_current}" step="0.1"></label>
@@ -452,6 +452,61 @@
         <button class="btn ghost sm" data-action="import">⬆︎ Import</button>
         <button class="btn ghost sm" data-action="reset" style="color:var(--bad)">Zurücksetzen</button>
       </div>`);
+    renderSyncSection();
+  }
+
+  // ---------- Sync-UI ----------
+  function renderSyncSection() {
+    const box = $("#sync-section", app);
+    if (!box) return;
+    const hasSync = window.Sync && Sync.available();
+    if (!hasSync) {
+      box.innerHTML = `<div class="banner">🔌 Geräte-Sync nicht aktiv – die App speichert lokal auf diesem Gerät.
+        Für Sync fehlt <code>app/config.local.js</code> (Supabase-URL + Key). Bis dahin: Backup nutzen.</div>`;
+      return;
+    }
+    const st = Sync.status();
+    if (st.state === "synced") {
+      box.innerHTML = `<div class="banner" style="background:color-mix(in srgb,var(--good) 14%,transparent); border-color:color-mix(in srgb,var(--good) 34%,transparent); color:var(--good)">
+        ✅ Sync aktiv – angemeldet als <b>${esc(st.email || "")}</b>. Deine Daten sind auf allen Geräten gleich.</div>
+        <button class="btn ghost sm" data-action="sync-logout">Abmelden</button>`;
+    } else if (st.state === "connecting") {
+      box.innerHTML = `<div class="banner">🔄 Verbinde mit Sync…</div>`;
+    } else {
+      box.innerHTML = `<div class="banner">📲 Melde dich an, damit Handy &amp; Laptop dieselben Daten teilen.
+        Du bekommst einen Login-Link per E-Mail (kein Passwort).</div>
+        ${st.error ? `<div class="hint" style="color:var(--bad)">Fehler: ${esc(st.error)}</div>` : ""}
+        <div class="row" style="gap:8px; margin-top:8px">
+          <input type="email" id="sync-email" placeholder="deine@email.ch" autocomplete="email">
+          <button class="btn" data-action="sync-login">Link senden</button>
+        </div>
+        <div class="hint" id="sync-msg"></div>
+        <div class="hint">Hinweis: Login funktioniert nur über <code>http://localhost</code> oder die veröffentlichte App – nicht per Doppelklick (file://).</div>`;
+    }
+  }
+  function renderSyncSectionIfOpen() { if ($("#sync-section", app)) renderSyncSection(); }
+
+  function updateSyncBadge(st) {
+    const b = $("#syncbadge", app); if (!b) return;
+    const map = {
+      synced: ["· ✓ Sync", "var(--good)"],
+      connecting: ["· Sync…", "var(--muted)"],
+      loggedout: ["· offline", "var(--faint)"],
+      error: ["· Sync-Fehler", "var(--bad)"],
+      local: ["", "var(--faint)"],
+    };
+    const [txt, col] = map[st.state] || ["", "var(--faint)"];
+    b.textContent = txt; b.style.color = col;
+  }
+
+  async function doSignIn() {
+    const inp = $("#sync-email", app); const email = ((inp && inp.value) || "").trim();
+    const msg = $("#sync-msg", app);
+    if (!email) { if (msg) msg.textContent = "Bitte E-Mail eingeben."; return; }
+    if (msg) msg.textContent = "Sende Login-Link…";
+    const res = await Sync.signIn(email);
+    if (res && res.error) { if (msg) { msg.textContent = "Fehler: " + res.error; msg.style.color = "var(--bad)"; } }
+    else if (msg) { msg.textContent = "✅ Link an " + email + " gesendet. Öffne ihn auf diesem Gerät."; msg.style.color = "var(--good)"; }
   }
 
   // ====================================================================
@@ -533,6 +588,8 @@
       case "save-weight": saveWeight(); break;
       case "export": doExport(); break;
       case "import": doImport(); break;
+      case "sync-login": doSignIn(); break;
+      case "sync-logout": if (window.Sync) Sync.signOut().then(renderSyncSectionIfOpen); break;
       case "reset": if (confirm("Wirklich alle Daten zurücksetzen?")) { S.reset(); closeModal(); render(); } break;
 
       // Modal
@@ -655,4 +712,12 @@
 
   // ---------- Start ----------
   render();
+
+  // Sync initialisieren (optional; App läuft auch ohne)
+  if (window.Sync) {
+    Sync.init(
+      (st) => { updateSyncBadge(st); renderSyncSectionIfOpen(); },   // Status-Änderung
+      () => { render(); }                                            // Remote-Änderung von anderem Gerät
+    );
+  }
 })();

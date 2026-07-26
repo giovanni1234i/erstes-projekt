@@ -135,9 +135,12 @@ Sync an, sobald die Keys da sind.
   Wochen-Menüplan, automatische Einkaufsliste, Profil/Ziele, Backup. Läuft
   lokal (localStorage), Light/Dark, Handy-tauglich.
   Start: `cd app && python3 -m http.server 8000` → http://localhost:8000
-- **⏳ Phase 2 – Supabase:** Login + Echtzeit-Sync über Geräte. Wartet nur auf
-  deine Zugangsdaten (Abschnitt 4). Danach wird `app/store.js` auf Supabase
-  umgestellt – der Rest der App bleibt gleich.
+- **🟡 Phase 2 – Supabase-Sync:** Code ist FERTIG eingebaut (`app/sync.js`,
+  Login per E-Mail-Magic-Link, ganzer Zustand als JSON in Tabelle `app_state`,
+  Realtime + Pull beim Öffnen). **Wartet auf deinen Login-Test** auf dem Gerät
+  (aus Claudes Cloud ist supabase.co gesperrt). To-dos: `schema.sql` erneut
+  ausführen (enthält jetzt `app_state`), in Supabase die Redirect-URLs setzen,
+  `app/config.local.js` anlegen – Details in [`supabase/SETUP.md`](supabase/SETUP.md).
 - **Phase 3 – Feinschliff:** Menüplan an deine Trainingszeiten koppeln,
   Meal-Prep-Liste (So ~60 Min), Rezepte-Editor, mehr Nährwerte.
 - **Phase 3b – Foto-Analyse in der App:** Foto von Quittung/Teller →
