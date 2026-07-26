@@ -80,10 +80,18 @@
     { id: "einkauf", label: "Einkauf", ic: "▣" },
     { id: "recovery", label: "Recovery", ic: "❤" },
   ];
+  const ICONS = {
+    heute: `<svg viewBox="0 0 24 24"><path d="M3 10.5 12 3l9 7.5"/><path d="M5 9.5V20a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V9.5"/></svg>`,
+    vorrat: `<svg viewBox="0 0 24 24"><path d="M21 8 12 3 3 8v8l9 5 9-5V8z"/><path d="M3 8l9 5 9-5"/><path d="M12 13v8"/></svg>`,
+    rezepte: `<svg viewBox="0 0 24 24"><path d="M7 3v8a2 2 0 0 1-4 0V3"/><path d="M5 11v10"/><path d="M18 3c-1.8 0-3 2-3 4.5S16.2 12 18 12"/><path d="M18 3v18"/></svg>`,
+    plan: `<svg viewBox="0 0 24 24"><rect x="3" y="4.5" width="18" height="16" rx="2.5"/><path d="M3 9.5h18"/><path d="M8 2.5v4"/><path d="M16 2.5v4"/></svg>`,
+    einkauf: `<svg viewBox="0 0 24 24"><path d="M6.5 8h11l-1 12.5h-9z"/><path d="M9 8a3 3 0 0 1 6 0"/></svg>`,
+    recovery: `<svg viewBox="0 0 24 24"><path d="M3 12h4l2.5-6 4 12L16 12h5"/></svg>`,
+  };
   function renderTabs() {
     $("#tabs", app).innerHTML = TABS.map(t =>
-      `<button data-tab="${t.id}" class="${state.tab === t.id ? "on" : ""}">
-         <span class="ic">${t.ic}</span>${t.label}</button>`).join("");
+      `<button data-tab="${t.id}" class="${state.tab === t.id ? "on" : ""}" aria-label="${t.label}">
+         <span class="ic">${ICONS[t.id] || ""}</span>${t.label}</button>`).join("");
   }
 
   // ====================================================================
@@ -95,15 +103,25 @@
     const target = S.targetFor(day.dayType);
     const tot = S.dayTotals(date);
 
-    const metric = (lab, val, tgt, cls, unit) => {
+    const macroBar = (name, val, tgt, cls) => {
       const pct = tgt ? Math.min(100, (val / tgt) * 100) : 0;
-      const over = val > tgt * 1.02;
-      return `<div class="metric">
-        <div class="lab">${lab}</div>
-        <div class="val">${r0(val)}<small>/${r0(tgt)}${unit || ""}</small></div>
-        <div class="bar ${cls} ${over ? "over" : ""}"><i style="width:${pct}%"></i></div>
-      </div>`;
+      const over = val > tgt * 1.03;
+      return `<div class="mrow">
+        <div class="mtop"><span class="mname">${name}</span><span class="mval">${r0(val)} / ${r0(tgt)} g</span></div>
+        <div class="bar ${cls} ${over ? "over" : ""}"><i style="width:${pct}%"></i></div></div>`;
     };
+    const kcalPct = target.kcal ? Math.min(1, tot.kcal / target.kcal) : 0;
+    const RC = 2 * Math.PI * 54;
+    const ringHtml = `<svg class="calring" viewBox="0 0 128 128" aria-hidden="true">
+        <defs><linearGradient id="cg" x1="0" y1="0" x2="1" y2="1">
+          <stop offset="0" stop-color="var(--accent)"/><stop offset="1" stop-color="var(--accent-2)"/></linearGradient></defs>
+        <circle class="track" cx="64" cy="64" r="54"/>
+        <circle class="prog" cx="64" cy="64" r="54" stroke="url(#cg)"
+          stroke-dasharray="${RC.toFixed(1)}" stroke-dashoffset="${(RC * (1 - kcalPct)).toFixed(1)}"
+          transform="rotate(-90 64 64)"/>
+        <text class="rnum" x="64" y="60">${r0(tot.kcal)}</text>
+        <text class="rlab" x="64" y="80">/ ${r0(target.kcal)} kcal</text>
+      </svg>`;
 
     const slotsHtml = D.slots.map(slot => {
       const items = day.items.filter(i => i.slot === slot);
@@ -156,13 +174,15 @@
             <button data-action="daytype" data-t="rest" class="${day.dayType === "rest" ? "on" : ""}">😴 Ruhetag</button>
           </div>
         </div>
-        <div class="rings">
-          ${metric("Kalorien", tot.kcal, target.kcal, "", "")}
-          ${metric("Protein", tot.protein, target.protein, "p", "g")}
-          ${metric("Kohlenh.", tot.carbs, target.carbs, "c", "g")}
-          ${metric("Fett", tot.fat, target.fat, "f", "g")}
+        <div class="cal">
+          ${ringHtml}
+          <div class="macros-col">
+            ${macroBar("Protein", tot.protein, target.protein, "p")}
+            ${macroBar("Kohlenhydrate", tot.carbs, target.carbs, "c")}
+            ${macroBar("Fett", tot.fat, target.fat, "f")}
+          </div>
         </div>
-        <div class="hint">${restKcal > 0
+        <div class="hint" style="text-align:center">${restKcal > 0
           ? `Noch <b>${r0(restKcal)} kcal</b> bis zum Ziel.`
           : `Ziel erreicht (+${r0(-restKcal)} kcal). 💪`}</div>
       </div>
@@ -349,15 +369,17 @@
   }
   function sparkline(vals) {
     if (vals.length < 2) return `<div class="hint">Zu wenig Punkte für die Kurve.</div>`;
-    const w = 320, h = 56, pad = 5;
+    const w = 320, h = 60, pad = 6;
     const min = Math.min(...vals), max = Math.max(...vals), rng = (max - min) || 1;
-    const pts = vals.map((v, i) => {
-      const x = pad + i / (vals.length - 1) * (w - 2 * pad);
-      const y = h - pad - ((v - min) / rng) * (h - 2 * pad);
-      return x.toFixed(1) + "," + y.toFixed(1);
-    }).join(" ");
-    return `<svg viewBox="0 0 ${w} ${h}" style="width:100%; height:56px" preserveAspectRatio="none">
-      <polyline points="${pts}" fill="none" stroke="var(--accent)" stroke-width="2.4" stroke-linejoin="round" stroke-linecap="round"/></svg>`;
+    const X = i => pad + i / (vals.length - 1) * (w - 2 * pad);
+    const Y = v => h - pad - ((v - min) / rng) * (h - 2 * pad);
+    const pts = vals.map((v, i) => `${X(i).toFixed(1)},${Y(v).toFixed(1)}`).join(" ");
+    const area = `M${X(0).toFixed(1)},${(h - pad).toFixed(1)} L${pts.split(" ").join(" L")} L${X(vals.length - 1).toFixed(1)},${(h - pad).toFixed(1)} Z`;
+    return `<svg class="spark" viewBox="0 0 ${w} ${h}" preserveAspectRatio="none" aria-hidden="true">
+      <defs><linearGradient id="sg" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0" stop-color="var(--accent)" stop-opacity=".38"/><stop offset="1" stop-color="var(--accent)" stop-opacity="0"/></linearGradient></defs>
+      <path d="${area}" fill="url(#sg)"/>
+      <polyline points="${pts}" fill="none" stroke="var(--accent)" stroke-width="2" vector-effect="non-scaling-stroke" stroke-linejoin="round" stroke-linecap="round"/></svg>`;
   }
   function loadWeekPlan() {
     const wp = D.weekPlan || {};
