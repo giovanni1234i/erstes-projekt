@@ -18,11 +18,11 @@ window.NUTRI_DATA = {
 
   // ---- Häufige Zutaten zum Anhäkeln (Vorrat) ----
   pantryQuickPick: [
-    "Haferflocken","Milch","Magerquark","Griechischer Joghurt","Eier",
-    "Reis","Teigwaren","Kartoffeln","Süsskartoffeln","Toast/Wrap",
+    "Haferflocken","Milch","Magerquark","Hüttenkäse","Griechischer Joghurt","Eier",
+    "Brot","Reis","Teigwaren","Kartoffeln","Süsskartoffeln","Toast/Wrap",
     "Hähnchenbrust","Rindshackfleisch","Lachs","Thunfisch (Dose)",
-    "Olivenöl","Erdnussbutter","Honig","Banane","Beeren (TK)",
-    "Whey Protein","Gouda","Mozzarella","Pesto","Passata/Tomatensauce",
+    "Olivenöl","Erdnussbutter","Honig","Banane","Datteln","Beeren (TK)",
+    "Whey Protein","Gouda","Mozzarella","Parmesan","Pesto","Passata/Tomatensauce",
     "Mandeln/Cashew","Avocado","Butter","Rahm",
   ],
 
@@ -62,6 +62,14 @@ window.NUTRI_DATA = {
     { name:"Avocado",                kcal:240, protein:3,   carbs:12, fat:22,  basis:"Stk" },
     { name:"Mandeln",                kcal:580, protein:21,  carbs:20, fat:50,  basis:"100g" },
     { name:"Cashew",                 kcal:553, protein:18,  carbs:30, fat:44,  basis:"100g" },
+    { name:"Hüttenkäse",             kcal:98,  protein:11,  carbs:3.4,fat:4.3, basis:"100g" },
+    { name:"Brot (Scheibe)",         kcal:120, protein:4,   carbs:22, fat:1.5, basis:"Stk" },
+    { name:"Parmesan",               kcal:400, protein:36,  carbs:0,  fat:28,  basis:"100g" },
+
+    // --- Getränke (mitzählen – auch Koffein im Blick behalten) ---
+    { name:"Energy Drink (250ml)",   kcal:115, protein:0,   carbs:28, fat:0,   basis:"Stk", category:"Getränk" },
+    { name:"Cola (3dl)",             kcal:130, protein:0,   carbs:33, fat:0,   basis:"Stk", category:"Getränk" },
+    { name:"Fruchtsaft (2.5dl)",     kcal:115, protein:0.5, carbs:27, fat:0,   basis:"Stk", category:"Getränk" },
 
     // --- Auswärts / Clubrestaurant (Schätzwerte pro Teller, editierbar) ---
     { name:"Auswärts: Teller normal",        kcal:850,  protein:45, carbs:85,  fat:32, basis:"Stk", category:"Auswärts" },
@@ -233,5 +241,50 @@ window.NUTRI_DATA = {
         {name:"Beeren (TK)", amount:60, unit:"g"},
       ],
       instructions:"Am Abend alles ins Glas, über Nacht in den Kühlschrank. Morgens mitnehmen." },
+
+    { name:"Brot mit Hüttenkäse", slot:"Frühstück", prep_min:5, servings:1, is_favorite:true,
+      tags:["frühstück","schnell","high-protein"],
+      kcal:550, protein:28, carbs:70, fat:12,
+      ingredients:[
+        {name:"Brot (Scheibe)", amount:3, unit:"Stk"},
+        {name:"Hüttenkäse", amount:180, unit:"g"},
+        {name:"Honig", amount:15, unit:"g"},
+        {name:"Banane", amount:1, unit:"Stk"},
+      ],
+      instructions:"Dein gewohntes Frühstück, etwas aufgestockt. An miesen Morgen: halbe Portion + dazu einen Shake (geht leichter runter)." },
+
+    { name:"Safran-Risotto mit Poulet", slot:"Mittag", prep_min:30, servings:1, is_favorite:true,
+      tags:["reis","favorit"],
+      kcal:900, protein:50, carbs:100, fat:30,
+      ingredients:[
+        {name:"Arborio-Reis (roh)", amount:90, unit:"g"},
+        {name:"Hähnchenbrust", amount:180, unit:"g"},
+        {name:"Parmesan", amount:20, unit:"g"},
+        {name:"Butter", amount:15, unit:"g"},
+        {name:"Safran", amount:1, unit:"Prise"},
+      ],
+      instructions:"Dein Clubrestaurant-Klassiker – geht auch daheim. Reis anschwitzen, mit Brühe + Safran cremig rühren, Poulet dazu, Parmesan/Butter unterheben." },
+
+    { name:"Pasta mit Fleischstück", slot:"Abend", prep_min:25, servings:1, is_favorite:true,
+      tags:["pasta"],
+      kcal:900, protein:55, carbs:90, fat:32,
+      ingredients:[
+        {name:"Teigwaren (gekocht)", amount:300, unit:"g"},
+        {name:"Rindsplätzli / Entrecôte", amount:180, unit:"g"},
+        {name:"Olivenöl", amount:12, unit:"ml"},
+        {name:"Passata/Tomatensauce", amount:100, unit:"g"},
+      ],
+      instructions:"Dein Standard-Abendessen. Fleischstück braten, Pasta mit etwas Sauce + Öl dazu." },
+
+    { name:"Pre-Slot-Boost (koffeinfrei)", slot:"Snack 2", prep_min:3, servings:1,
+      tags:["pre-training","schnell"],
+      kcal:250, protein:3, carbs:58, fat:2,
+      ingredients:[
+        {name:"Banane", amount:1, unit:"Stk"},
+        {name:"Datteln", amount:40, unit:"g"},
+        {name:"Honig", amount:15, unit:"g"},
+        {name:"Kreatin", amount:5, unit:"g"},
+      ],
+      instructions:"Vor dem 21:00-Slot STATT Energy Drink: schnelle Kohlenhydrate für Power, KEIN Koffein → schützt den Schlaf. Kreatin-Timing ist egal." },
   ],
 };
