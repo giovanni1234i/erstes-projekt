@@ -484,7 +484,7 @@
       <div class="chips" style="margin-bottom:14px">
         <button class="chip on" data-action="mode-food" id="m-food">Lebensmittel</button>
         <button class="chip" data-action="mode-recipe" id="m-recipe">Rezept</button>
-        <button class="chip" data-action="mode-est" id="m-est">🍽 Auswärts</button>
+        <button class="chip" data-action="mode-est" id="m-est">✏️ Eigenes</button>
       </div>
       <label class="field"><span class="l">Slot</span>
         <select id="af-slot">${D.slots.map(s => `<option ${s === slot ? "selected" : ""}>${esc(s)}</option>`).join("")}</select></label>
@@ -504,15 +504,15 @@
 
       <div id="pane-est" style="display:none">
         <label class="field"><span class="l">Was hast du gegessen?</span>
-          <input type="text" id="est-name" placeholder="z.B. Clubrestaurant: Poulet, Reis, Salat"></label>
-        <label class="field"><span class="l">Kalorien (Schätzung)</span>
-          <input type="number" id="est-kcal" value="900" min="0" step="50"></label>
+          <input type="text" id="est-name" placeholder="z.B. Glace, Pizza, Snack, Restaurant …"></label>
+        <label class="field"><span class="l">Kalorien</span>
+          <input type="number" id="est-kcal" placeholder="z.B. 250" min="0" step="10"></label>
         <div class="grid2">
           <label class="field"><span class="l">Protein g <span class="faint">(optional)</span></span><input type="number" id="est-p" placeholder="–"></label>
           <label class="field"><span class="l">Kohlenh. g <span class="faint">(optional)</span></span><input type="number" id="est-c" placeholder="–"></label>
           <label class="field"><span class="l">Fett g <span class="faint">(optional)</span></span><input type="number" id="est-f" placeholder="–"></label>
         </div>
-        <div class="hint">Mittag im Clubrestaurant? Name + geschätzte kcal reichen. Oder oben ein „Auswärts"-Preset unter Lebensmittel wählen. Genauer geht's per Foto im Chat.</div>
+        <div class="hint">Für <b>alles</b>, was nicht in der Liste steht – Glace, Pizza, ein Snack unterwegs, Restaurant … Name + kcal reichen (Makros optional). Genauer geht's per Foto im Chat.</div>
       </div>
 
       <button class="btn block" data-action="save-food" style="margin-top:6px">Eintragen</button>`);

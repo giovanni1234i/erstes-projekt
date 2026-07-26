@@ -97,6 +97,12 @@ window.NUTRI_DATA = {
     { name:"Granola",                kcal:450, protein:10,  carbs:65, fat:16,  basis:"100g" },
     { name:"Reiswaffel",             kcal:30,  protein:0.6, carbs:6.5,fat:0.2, basis:"Stk" },
 
+    // --- Süsses / Treats (loggen, wenn's mal sein muss) ---
+    { name:"Glace/Eiscreme",         kcal:210, protein:3.5, carbs:24, fat:11, basis:"100g" },
+    { name:"Glace (1 Kugel)",        kcal:70,  protein:1.2, carbs:8,  fat:3.7,basis:"Stk" },
+    { name:"Schokolade",             kcal:540, protein:7,   carbs:58, fat:31, basis:"100g" },
+    { name:"Chips",                  kcal:540, protein:6,   carbs:53, fat:34, basis:"100g" },
+
     // --- Getränke (mitzählen – auch Koffein im Blick behalten) ---
     { name:"Energy Drink (250ml)",   kcal:115, protein:0,   carbs:28, fat:0,   basis:"Stk", category:"Getränk" },
     { name:"Cola (3dl)",             kcal:130, protein:0,   carbs:33, fat:0,   basis:"Stk", category:"Getränk" },
