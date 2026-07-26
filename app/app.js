@@ -1,0 +1,626 @@
+/* =====================================================================
+ *  Ernährungs-App · UI-Logik (Phase 1, lokal)
+ * ===================================================================== */
+(function () {
+  const D = window.NUTRI_DATA;
+  const S = window.Store;
+
+  // ---------- kleine Helfer ----------
+  const $ = (sel, root = document) => root.querySelector(sel);
+  const esc = (s) => String(s == null ? "" : s).replace(/[&<>"']/g, c =>
+    ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+  const r0 = (n) => Math.round(n);
+  const WEEKDAYS = ["Mo", "Di", "Mi", "Do", "Fr", "Sa", "So"];
+
+  function todayISO() {
+    const d = new Date();
+    return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+  }
+  function fmtDate(iso) {
+    const [y, m, d] = iso.split("-").map(Number);
+    const dt = new Date(y, m - 1, d);
+    const wd = ["Sonntag", "Montag", "Dienstag", "Mittwoch", "Donnerstag", "Freitag", "Samstag"][dt.getDay()];
+    if (iso === todayISO()) return "Heute · " + wd;
+    return `${wd}, ${String(d).padStart(2, "0")}.${String(m).padStart(2, "0")}.`;
+  }
+  function shiftDate(iso, days) {
+    const [y, m, d] = iso.split("-").map(Number);
+    const dt = new Date(y, m - 1, d + days);
+    return `${dt.getFullYear()}-${String(dt.getMonth() + 1).padStart(2, "0")}-${String(dt.getDate()).padStart(2, "0")}`;
+  }
+
+  // Zutat-/Vorrat-Namensabgleich über Wort-Überschneidung
+  const STOP = new Set(["der", "die", "das", "dose", "gekocht", "vollfett", "portion", "scheibe", "tk"]);
+  function words(name) {
+    return String(name).toLowerCase().replace(/\(.*?\)/g, " ").split(/[^a-zäöüß]+/)
+      .filter(w => w.length > 2 && !STOP.has(w));
+  }
+  function overlaps(a, b) {
+    const wb = new Set(words(b));
+    return words(a).some(w => wb.has(w));
+  }
+  const STAPLES = ["olivenöl", "honig", "salz", "öl", "butter"];
+  function isStaple(name) { const w = words(name).join(" "); return STAPLES.some(s => w.includes(s)); }
+  function missingIngredients(recipe) {
+    const pantry = S.getPantry();
+    return (recipe.ingredients || []).filter(ing =>
+      !isStaple(ing.name) && !pantry.some(p => overlaps(p.name, ing.name))
+    ).map(i => i.name);
+  }
+
+  // ---------- App-State ----------
+  const state = {
+    tab: "heute",
+    date: todayISO(),
+    rf: { fav: false, cook: false, kein: false, tag: null, q: "" },
+  };
+
+  // ---------- Root ----------
+  const app = document.createElement("div");
+  app.className = "app";
+  app.innerHTML = `
+    <header class="top">
+      <div>
+        <h1 id="title">Heute</h1>
+        <div class="sub" id="subtitle">Ernährung · Meier G.</div>
+      </div>
+      <button class="icon-btn" data-action="profile" title="Profil & Einstellungen">⚙︎</button>
+    </header>
+    <main id="view"></main>
+    <nav class="tabs" id="tabs"></nav>
+    <div id="modal-root"></div>`;
+  document.body.appendChild(app);
+
+  const view = $("#view", app);
+  const TABS = [
+    { id: "heute", label: "Heute", ic: "◎" },
+    { id: "vorrat", label: "Vorrat", ic: "▤" },
+    { id: "rezepte", label: "Rezepte", ic: "✦" },
+    { id: "plan", label: "Plan", ic: "▦" },
+    { id: "einkauf", label: "Einkauf", ic: "▣" },
+  ];
+  function renderTabs() {
+    $("#tabs", app).innerHTML = TABS.map(t =>
+      `<button data-tab="${t.id}" class="${state.tab === t.id ? "on" : ""}">
+         <span class="ic">${t.ic}</span>${t.label}</button>`).join("");
+  }
+
+  // ====================================================================
+  //  TAB: HEUTE
+  // ====================================================================
+  function renderHeute() {
+    const date = state.date;
+    const day = S.getDay(date);
+    const target = S.targetFor(day.dayType);
+    const tot = S.dayTotals(date);
+
+    const metric = (lab, val, tgt, cls, unit) => {
+      const pct = tgt ? Math.min(100, (val / tgt) * 100) : 0;
+      const over = val > tgt * 1.02;
+      return `<div class="metric">
+        <div class="lab">${lab}</div>
+        <div class="val">${r0(val)}<small>/${r0(tgt)}${unit || ""}</small></div>
+        <div class="bar ${cls} ${over ? "over" : ""}"><i style="width:${pct}%"></i></div>
+      </div>`;
+    };
+
+    const slotsHtml = D.slots.map(slot => {
+      const items = day.items.filter(i => i.slot === slot);
+      const inner = items.length
+        ? items.map(i => `<div class="item">
+            <span class="n">${esc(i.name)}</span>
+            <span class="row"><span class="k">${r0(i.kcal)} kcal · ${r0(i.protein)}g P</span>
+            <button class="x" data-action="del-item" data-id="${i.id}" title="Entfernen">✕</button></span>
+          </div>`).join("")
+        : `<div class="item" style="opacity:.6"><span class="n muted small">– noch nichts –</span>
+             <button class="btn sm ghost" data-action="add-food" data-slot="${esc(slot)}">+</button></div>`;
+      const slotKcal = items.reduce((s, i) => s + (+i.kcal || 0), 0);
+      return `<div class="slot">
+        <div class="slot-h"><span class="name">${esc(slot)}${slotKcal ? " · " + r0(slotKcal) + " kcal" : ""}</span>
+          <button class="btn sm ghost" data-action="add-food" data-slot="${esc(slot)}">+ Essen</button></div>
+        ${inner}</div>`;
+    }).join("");
+
+    const restKcal = target.kcal - tot.kcal;
+
+    view.innerHTML = `
+      <div class="card">
+        <div class="spread" style="margin-bottom:14px">
+          <button class="btn sm ghost" data-action="date" data-d="-1">‹</button>
+          <div style="text-align:center">
+            <div style="font-weight:700">${fmtDate(date)}</div>
+            ${date !== todayISO() ? `<button class="btn sm ghost" style="margin-top:4px" data-action="date" data-d="today">→ heute</button>` : ""}
+          </div>
+          <button class="btn sm ghost" data-action="date" data-d="1">›</button>
+        </div>
+        <div class="spread" style="margin-bottom:14px">
+          <div class="seg">
+            <button data-action="daytype" data-t="train" class="${day.dayType === "train" ? "on" : ""}">🏒 Trainingstag</button>
+            <button data-action="daytype" data-t="rest" class="${day.dayType === "rest" ? "on" : ""}">😴 Ruhetag</button>
+          </div>
+        </div>
+        <div class="rings">
+          ${metric("Kalorien", tot.kcal, target.kcal, "", "")}
+          ${metric("Protein", tot.protein, target.protein, "p", "g")}
+          ${metric("Kohlenh.", tot.carbs, target.carbs, "c", "g")}
+          ${metric("Fett", tot.fat, target.fat, "f", "g")}
+        </div>
+        <div class="hint">${restKcal > 0
+          ? `Noch <b>${r0(restKcal)} kcal</b> bis zum Ziel.`
+          : `Ziel erreicht (+${r0(-restKcal)} kcal). 💪`}</div>
+      </div>
+
+      <div class="card">
+        <div class="spread"><h2 style="margin:0">Mahlzeiten</h2>
+          <button class="chip ${state.rf.kein ? "on" : ""}" data-action="kein-appetit">🥤 Kein Appetit?</button></div>
+        <div style="margin-top:12px">${slotsHtml}</div>
+      </div>`;
+  }
+
+  // ====================================================================
+  //  TAB: VORRAT
+  // ====================================================================
+  function renderVorrat() {
+    const pantry = S.getPantry();
+    const quick = D.pantryQuickPick.map(name => {
+      const on = S.hasPantry(name);
+      return `<button class="chip ${on ? "on" : ""}" data-action="quick-pantry" data-name="${esc(name)}">${on ? "✓ " : "+ "}${esc(name)}</button>`;
+    }).join("");
+
+    const list = pantry.length
+      ? pantry.map(p => `<div class="item">
+          <span class="n">${esc(p.name)}${p.quantity ? ` <span class="muted small">· ${esc(p.quantity)} ${esc(p.unit || "")}</span>` : ""}</span>
+          <button class="x" data-action="del-pantry" data-id="${p.id}">✕</button></div>`).join("")
+      : `<div class="empty">Noch nichts im Vorrat. Häkle oben an, was du zuhause hast.</div>`;
+
+    view.innerHTML = `
+      <div class="card">
+        <h2>Was hast du zuhause?</h2>
+        <div class="chips" style="max-height:none">${quick}</div>
+        <div class="row" style="margin-top:14px; gap:8px">
+          <input type="text" id="pantry-free" placeholder="Etwas anderes eintippen…">
+          <button class="btn" data-action="add-pantry-free">Add</button>
+        </div>
+      </div>
+      <div class="card">
+        <div class="spread"><h2 style="margin:0">Dein Vorrat (${pantry.length})</h2></div>
+        <div style="margin-top:10px">${list}</div>
+      </div>`;
+  }
+
+  // ====================================================================
+  //  TAB: REZEPTE
+  // ====================================================================
+  function renderRezepte() {
+    const rf = state.rf;
+    let recipes = S.getRecipes().slice();
+
+    // Filter
+    if (rf.fav) recipes = recipes.filter(r => r.is_favorite);
+    if (rf.kein) recipes = recipes.filter(r => (r.tags || []).includes("kein-appetit"));
+    if (rf.tag) recipes = recipes.filter(r => (r.tags || []).includes(rf.tag));
+    if (rf.q) {
+      const q = rf.q.toLowerCase();
+      recipes = recipes.filter(r => r.name.toLowerCase().includes(q) ||
+        (r.tags || []).some(t => t.includes(q)) ||
+        (r.ingredients || []).some(i => i.name.toLowerCase().includes(q)));
+    }
+    // Kochbarkeit berechnen
+    recipes = recipes.map(r => ({ r, miss: missingIngredients(r) }));
+    if (rf.cook) recipes = recipes.filter(x => x.miss.length <= 1);
+    // Sortierung: kochbar zuerst, dann Favoriten
+    recipes.sort((a, b) => (a.miss.length - b.miss.length) || (b.r.is_favorite - a.r.is_favorite));
+
+    const allTags = ["frühstück", "pasta", "lachs", "grill", "schnell", "meal-prep", "high-protein"];
+    const tagChips = allTags.map(t =>
+      `<button class="chip ${rf.tag === t ? "on" : ""}" data-action="filter-tag" data-tag="${t}">${t}</button>`).join("");
+
+    const cards = recipes.length ? recipes.map(({ r, miss }) => {
+      const cook = miss.length === 0;
+      const tags = (r.tags || []).map(t => {
+        const cls = t === "kein-appetit" ? "kein" : t === "grill" ? "grill" : "";
+        return `<span class="tag ${cls}">${esc(t)}</span>`;
+      }).join("");
+      return `<div class="recipe">
+        <div class="rh">
+          <div>
+            <div class="title">${esc(r.name)}</div>
+            <div class="macros">${r0(r.kcal)} kcal · ${r0(r.protein)}g P · ${r0(r.carbs)}g K · ${r0(r.fat)}g F · ⏱ ${r.prep_min || "?"}′</div>
+          </div>
+          <button class="fav ${r.is_favorite ? "on" : ""}" data-action="fav" data-id="${r.id}" title="Favorit">${r.is_favorite ? "★" : "☆"}</button>
+        </div>
+        <div class="tags">
+          ${cook ? `<span class="tag can">✓ kochbar</span>` : (miss.length ? `<span class="tag">fehlt: ${esc(miss.slice(0, 2).join(", "))}${miss.length > 2 ? "…" : ""}</span>` : "")}
+          ${tags}
+        </div>
+        <div class="acts">
+          <button class="btn sm" data-action="log-recipe" data-id="${r.id}">+ Zu Heute</button>
+          <button class="btn sm ghost" data-action="recipe-detail" data-id="${r.id}">Details</button>
+        </div>
+      </div>`;
+    }).join("") : `<div class="empty">Keine Rezepte für diesen Filter.</div>`;
+
+    view.innerHTML = `
+      <div class="card">
+        <input type="text" id="recipe-q" placeholder="🔎 Worauf hast du Lust? (z.B. Pasta, Lachs…)" value="${esc(rf.q)}">
+        <div class="chips" style="margin-top:12px">
+          <button class="chip ${rf.cook ? "on" : ""}" data-action="filter-cook">🍳 Mit Vorrat kochbar</button>
+          <button class="chip ${rf.fav ? "on" : ""}" data-action="filter-fav">★ Favoriten</button>
+          <button class="chip ${rf.kein ? "on" : ""}" data-action="filter-kein">🥤 Kein Appetit</button>
+        </div>
+        <div class="chips scroll" style="margin-top:8px">${tagChips}
+          ${(rf.tag || rf.q || rf.cook || rf.fav || rf.kein) ? `<button class="chip" data-action="filter-clear">✕ Reset</button>` : ""}
+        </div>
+      </div>
+      <div class="rlist">${cards}</div>`;
+
+    const q = $("#recipe-q", view);
+    if (q) q.addEventListener("input", (e) => { state.rf.q = e.target.value; /* live filtern ohne Fokusverlust */ debounceRerender(); });
+  }
+  let _t;
+  function debounceRerender() { clearTimeout(_t); _t = setTimeout(() => { if (state.tab === "rezepte") { renderRezepte(); const q = $("#recipe-q", view); if (q) { q.focus(); q.setSelectionRange(q.value.length, q.value.length); } } }, 200); }
+
+  // ====================================================================
+  //  TAB: PLAN
+  // ====================================================================
+  function renderPlan() {
+    const plan = S.getPlan();
+    const head = `<tr><th>Slot</th>${WEEKDAYS.map(d => `<th>${d}</th>`).join("")}</tr>`;
+    const rows = D.slots.map(slot => {
+      const cells = WEEKDAYS.map(day => {
+        const rid = (plan[day] || {})[slot];
+        const rec = rid ? S.getRecipe(rid) : null;
+        return `<td><div class="cell ${rec ? "set" : ""}" data-action="plan-cell" data-day="${day}" data-slot="${esc(slot)}">${rec ? esc(rec.name) : "+"}</div></td>`;
+      }).join("");
+      return `<tr><th>${esc(slot)}</th>${cells}</tr>`;
+    }).join("");
+
+    view.innerHTML = `
+      <div class="card">
+        <h2>Wochen-Menüplan</h2>
+        <div class="hint">Tippe eine Zelle, um ein Rezept zu setzen. Danach die Einkaufsliste generieren.</div>
+        <div class="plan-scroll" style="margin-top:12px"><table class="plan">${head}${rows}</table></div>
+        <button class="btn block" style="margin-top:14px" data-action="gen-shopping">🛒 Einkaufsliste aus Plan generieren</button>
+      </div>`;
+  }
+
+  // ====================================================================
+  //  TAB: EINKAUF
+  // ====================================================================
+  function renderEinkauf() {
+    const list = S.getShopping();
+    const items = list.length ? list.map(it => `
+      <div class="shop-item ${it.checked ? "done" : ""}">
+        <input type="checkbox" ${it.checked ? "checked" : ""} data-action="toggle-shop" data-id="${it.id}">
+        <label>${esc(it.name)}</label>
+        <span class="amt">${it.amount ? esc(it.amount) + " " + esc(it.unit || "") : ""}</span>
+      </div>`).join("") : `<div class="empty">Liste ist leer. Generiere sie im Tab „Plan" oder füge unten etwas hinzu.</div>`;
+
+    view.innerHTML = `
+      <div class="card">
+        <div class="spread"><h2 style="margin:0">Einkaufsliste</h2>
+          ${list.some(i => i.checked) ? `<button class="btn sm ghost" data-action="clear-checked">Erledigte weg</button>` : ""}</div>
+        <div style="margin-top:10px">${items}</div>
+        <div class="row" style="margin-top:14px; gap:8px">
+          <input type="text" id="shop-free" placeholder="Artikel hinzufügen…">
+          <button class="btn" data-action="add-shop-free">Add</button>
+        </div>
+        <div class="hint">Tipp: „Aus Plan generieren" zieht die Zutaten deines Wochenplans ab, was schon im Vorrat ist.</div>
+      </div>`;
+  }
+
+  // ====================================================================
+  //  MODALS
+  // ====================================================================
+  function openModal(html) {
+    $("#modal-root", app).innerHTML = `<div class="overlay" data-action="overlay">
+      <div class="modal" role="dialog" aria-modal="true">${html}</div></div>`;
+  }
+  function closeModal() { $("#modal-root", app).innerHTML = ""; }
+
+  function modalAddFood(slot) {
+    const foods = S.getFoods().slice().sort((a, b) => a.name.localeCompare(b.name));
+    const recipes = S.getRecipes().slice().sort((a, b) => a.name.localeCompare(b.name));
+    openModal(`
+      <div class="mh"><h3>Essen eintragen</h3><button class="icon-btn" data-action="close">✕</button></div>
+      <div class="chips" style="margin-bottom:14px">
+        <button class="chip on" data-action="mode-food" id="m-food">Lebensmittel</button>
+        <button class="chip" data-action="mode-recipe" id="m-recipe">Rezept</button>
+      </div>
+      <label class="field"><span class="l">Slot</span>
+        <select id="af-slot">${D.slots.map(s => `<option ${s === slot ? "selected" : ""}>${esc(s)}</option>`).join("")}</select></label>
+
+      <div id="pane-food">
+        <label class="field"><span class="l">Lebensmittel</span>
+          <select id="af-food">${foods.map(f => `<option value="${f.id}">${esc(f.name)} (${f.kcal} kcal/${esc(f.basis)})</option>`).join("")}</select></label>
+        <label class="field"><span class="l">Menge (<span id="af-unit">g</span>)</span>
+          <input type="number" id="af-amount" value="100" min="0" step="10"></label>
+        <div class="hint" id="af-preview"></div>
+      </div>
+
+      <div id="pane-recipe" style="display:none">
+        <label class="field"><span class="l">Rezept</span>
+          <select id="af-recipe">${recipes.map(r => `<option value="${r.id}">${esc(r.name)} (${r0(r.kcal)} kcal)</option>`).join("")}</select></label>
+      </div>
+
+      <button class="btn block" data-action="save-food" style="margin-top:6px">Eintragen</button>`);
+
+    const foodSel = $("#af-food", app), amt = $("#af-amount", app), unit = $("#af-unit", app), prev = $("#af-preview", app);
+    function refresh() {
+      const f = S.getFoods().find(x => x.id === foodSel.value);
+      if (!f) return;
+      unit.textContent = f.basis === "Stk" ? "Stk" : (f.basis === "100ml" ? "ml" : "g");
+      const m = macroForFood(f, +amt.value || 0);
+      prev.innerHTML = `≈ <b>${r0(m.kcal)} kcal</b> · ${r0(m.protein)}g P · ${r0(m.carbs)}g K · ${r0(m.fat)}g F`;
+    }
+    foodSel.addEventListener("change", refresh);
+    amt.addEventListener("input", refresh);
+    refresh();
+  }
+
+  function macroForFood(f, amount) {
+    const factor = f.basis === "Stk" ? amount : amount / 100;
+    return { kcal: f.kcal * factor, protein: f.protein * factor, carbs: f.carbs * factor, fat: f.fat * factor };
+  }
+
+  function modalRecipeDetail(id) {
+    const r = S.getRecipe(id); if (!r) return;
+    const miss = missingIngredients(r);
+    const ing = (r.ingredients || []).map(i => {
+      const have = isStaple(i.name) || S.getPantry().some(p => overlaps(p.name, i.name));
+      return `<div class="item"><span class="n">${esc(i.name)}</span>
+        <span class="k">${esc(i.amount)} ${esc(i.unit)} ${have ? "✓" : "🛒"}</span></div>`;
+    }).join("");
+    openModal(`
+      <div class="mh"><h3>${esc(r.name)}</h3><button class="icon-btn" data-action="close">✕</button></div>
+      <div class="macros" style="font:600 13px var(--mono); color:var(--muted); margin-bottom:14px">
+        ${r0(r.kcal)} kcal · ${r0(r.protein)}g P · ${r0(r.carbs)}g K · ${r0(r.fat)}g F · ⏱ ${r.prep_min || "?"} Min</div>
+      <div class="l" style="font:600 12px var(--mono); text-transform:uppercase; color:var(--faint); margin-bottom:6px">Zutaten</div>
+      ${ing}
+      ${(r.instructions ? `<div class="l" style="font:600 12px var(--mono); text-transform:uppercase; color:var(--faint); margin:14px 0 6px">Zubereitung</div>
+        <p class="small muted" style="margin:0">${esc(r.instructions)}</p>` : "")}
+      <div class="acts" style="display:flex; gap:8px; margin-top:16px">
+        <button class="btn block" data-action="log-recipe" data-id="${r.id}">+ Zu Heute (${esc(r.slot || D.slots[0])})</button>
+        ${miss.length ? `<button class="btn ghost" data-action="add-missing" data-id="${r.id}">🛒 Fehlendes</button>` : ""}
+      </div>`);
+  }
+
+  function modalProfile() {
+    const s = S.getSettings();
+    const w = S.getWeight().slice(-1)[0];
+    openModal(`
+      <div class="mh"><h3>Profil & Ziele</h3><button class="icon-btn" data-action="close">✕</button></div>
+
+      <div class="banner">🔌 Geräte-Sync (Supabase) ist noch nicht aktiv – die App speichert aktuell lokal auf diesem Gerät. Sichere deine Daten unten per Backup.</div>
+
+      <div class="grid2">
+        <label class="field"><span class="l">Gewicht (kg)</span><input type="number" id="p-wc" value="${s.weight_current}" step="0.1"></label>
+        <label class="field"><span class="l">Ziel (kg)</span><input type="number" id="p-wg" value="${s.weight_goal}" step="0.1"></label>
+      </div>
+      <label class="field"><span class="l">Grösse (cm)</span><input type="number" id="p-h" value="${s.height_cm}"></label>
+
+      <div class="l" style="font:700 12px var(--mono); text-transform:uppercase; color:var(--faint); margin:6px 0 8px">🏒 Trainingstag</div>
+      <div class="grid2">
+        <label class="field"><span class="l">kcal</span><input type="number" id="p-kt" value="${s.kcal_train}"></label>
+        <label class="field"><span class="l">Protein g</span><input type="number" id="p-pt" value="${s.protein_train}"></label>
+        <label class="field"><span class="l">Kohlenh. g</span><input type="number" id="p-ct" value="${s.carbs_train}"></label>
+        <label class="field"><span class="l">Fett g</span><input type="number" id="p-ft" value="${s.fat_train}"></label>
+      </div>
+      <div class="l" style="font:700 12px var(--mono); text-transform:uppercase; color:var(--faint); margin:6px 0 8px">😴 Ruhetag</div>
+      <div class="grid2">
+        <label class="field"><span class="l">kcal</span><input type="number" id="p-kr" value="${s.kcal_rest}"></label>
+        <label class="field"><span class="l">Protein g</span><input type="number" id="p-pr" value="${s.protein_rest}"></label>
+        <label class="field"><span class="l">Kohlenh. g</span><input type="number" id="p-cr" value="${s.carbs_rest}"></label>
+        <label class="field"><span class="l">Fett g</span><input type="number" id="p-fr" value="${s.fat_rest}"></label>
+      </div>
+      <button class="btn block" data-action="save-profile">Speichern</button>
+
+      <div class="l" style="font:700 12px var(--mono); text-transform:uppercase; color:var(--faint); margin:20px 0 8px">Wöchentliches Wiegen</div>
+      ${w ? `<div class="hint" style="margin-top:0">Letzter Eintrag: ${esc(w.date)} · ${esc(w.weight_kg)} kg</div>` : ""}
+      <div class="row" style="gap:8px; margin-top:8px">
+        <input type="number" id="wl-kg" placeholder="kg (morgens, nüchtern)" step="0.1">
+        <button class="btn" data-action="save-weight">Wiegen</button>
+      </div>
+
+      <div class="l" style="font:700 12px var(--mono); text-transform:uppercase; color:var(--faint); margin:20px 0 8px">Backup</div>
+      <div class="row" style="gap:8px; flex-wrap:wrap">
+        <button class="btn ghost sm" data-action="export">⬇︎ Export (Datei)</button>
+        <button class="btn ghost sm" data-action="import">⬆︎ Import</button>
+        <button class="btn ghost sm" data-action="reset" style="color:var(--bad)">Zurücksetzen</button>
+      </div>`);
+  }
+
+  // ====================================================================
+  //  Router
+  // ====================================================================
+  const RENDER = { heute: renderHeute, vorrat: renderVorrat, rezepte: renderRezepte, plan: renderPlan, einkauf: renderEinkauf };
+  function render() {
+    renderTabs();
+    $("#title", app).textContent = TABS.find(t => t.id === state.tab).label;
+    (RENDER[state.tab] || renderHeute)();
+    window.scrollTo({ top: 0 });
+  }
+
+  // ====================================================================
+  //  Events (Delegation)
+  // ====================================================================
+  document.addEventListener("click", (e) => {
+    const tabBtn = e.target.closest("[data-tab]");
+    if (tabBtn) { state.tab = tabBtn.dataset.tab; render(); return; }
+
+    const el = e.target.closest("[data-action]");
+    if (!el) return;
+    const a = el.dataset.action;
+    const id = el.dataset.id;
+
+    switch (a) {
+      // Navigation / Datum
+      case "date":
+        state.date = el.dataset.d === "today" ? todayISO() : shiftDate(state.date, +el.dataset.d);
+        renderHeute(); break;
+      case "daytype": S.setDayType(state.date, el.dataset.t); renderHeute(); break;
+
+      // Heute: Essen
+      case "add-food": modalAddFood(el.dataset.slot || D.slots[0]); break;
+      case "mode-food": $("#pane-food", app).style.display = ""; $("#pane-recipe", app).style.display = "none";
+        $("#m-food", app).classList.add("on"); $("#m-recipe", app).classList.remove("on"); break;
+      case "mode-recipe": $("#pane-food", app).style.display = "none"; $("#pane-recipe", app).style.display = "";
+        $("#m-recipe", app).classList.add("on"); $("#m-food", app).classList.remove("on"); break;
+      case "save-food": saveFoodFromModal(); break;
+      case "del-item": S.removeLogItem(state.date, id); renderHeute(); break;
+      case "log-recipe": logRecipe(id); break;
+      case "kein-appetit": state.tab = "rezepte"; state.rf = { fav: false, cook: false, kein: true, tag: null, q: "" }; render(); break;
+
+      // Vorrat
+      case "quick-pantry": {
+        const name = el.dataset.name;
+        if (S.hasPantry(name)) { const p = S.getPantry().find(x => x.name.toLowerCase() === name.toLowerCase()); if (p) S.removePantry(p.id); }
+        else S.addPantry({ name });
+        renderVorrat(); break;
+      }
+      case "add-pantry-free": {
+        const inp = $("#pantry-free", app); const v = (inp.value || "").trim();
+        if (v) { if (!S.hasPantry(v)) S.addPantry({ name: v }); renderVorrat(); }
+        break;
+      }
+      case "del-pantry": S.removePantry(id); renderVorrat(); break;
+
+      // Rezepte
+      case "filter-cook": state.rf.cook = !state.rf.cook; renderRezepte(); break;
+      case "filter-fav": state.rf.fav = !state.rf.fav; renderRezepte(); break;
+      case "filter-kein": state.rf.kein = !state.rf.kein; renderRezepte(); break;
+      case "filter-tag": state.rf.tag = state.rf.tag === el.dataset.tag ? null : el.dataset.tag; renderRezepte(); break;
+      case "filter-clear": state.rf = { fav: false, cook: false, kein: false, tag: null, q: "" }; renderRezepte(); break;
+      case "fav": S.toggleFavorite(id); renderRezepte(); break;
+      case "recipe-detail": modalRecipeDetail(id); break;
+      case "add-missing": addMissingToShopping(id); closeModal(); state.tab = "einkauf"; render(); break;
+
+      // Plan
+      case "plan-cell": choosePlanRecipe(el.dataset.day, el.dataset.slot); break;
+      case "gen-shopping": generateShopping(); state.tab = "einkauf"; render(); break;
+
+      // Einkauf
+      case "toggle-shop": S.toggleShopping(id); renderEinkauf(); break;
+      case "add-shop-free": { const inp = $("#shop-free", app); const v = (inp.value || "").trim(); if (v) { S.addShopping({ name: v }); renderEinkauf(); } break; }
+      case "clear-checked": S.clearCheckedShopping(); renderEinkauf(); break;
+
+      // Profil
+      case "profile": modalProfile(); break;
+      case "save-profile": saveProfile(); break;
+      case "save-weight": saveWeight(); break;
+      case "export": doExport(); break;
+      case "import": doImport(); break;
+      case "reset": if (confirm("Wirklich alle Daten zurücksetzen?")) { S.reset(); closeModal(); render(); } break;
+
+      // Modal
+      case "close": closeModal(); break;
+      case "overlay": if (e.target === el) closeModal(); break;
+    }
+  });
+
+  // ---------- Aktionen ----------
+  function saveFoodFromModal() {
+    const slot = $("#af-slot", app).value;
+    const recipeMode = $("#pane-recipe", app).style.display !== "none";
+    if (recipeMode) {
+      const rid = $("#af-recipe", app).value;
+      const r = S.getRecipe(rid); if (!r) return;
+      S.addLogItem(state.date, { slot, name: r.name, kcal: r.kcal, protein: r.protein, carbs: r.carbs, fat: r.fat, recipe_id: r.id });
+    } else {
+      const f = S.getFoods().find(x => x.id === $("#af-food", app).value); if (!f) return;
+      const amount = +$("#af-amount", app).value || 0;
+      const m = macroForFood(f, amount);
+      const unit = f.basis === "Stk" ? "Stk" : (f.basis === "100ml" ? "ml" : "g");
+      S.addLogItem(state.date, { slot, name: `${f.name} (${amount} ${unit})`, ...m });
+    }
+    closeModal(); state.tab = "heute"; render();
+  }
+
+  function logRecipe(id) {
+    const r = S.getRecipe(id); if (!r) return;
+    const slot = r.slot && D.slots.includes(r.slot) ? r.slot : D.slots[0];
+    S.addLogItem(state.date, { slot, name: r.name, kcal: r.kcal, protein: r.protein, carbs: r.carbs, fat: r.fat, recipe_id: r.id });
+    closeModal(); state.tab = "heute"; render();
+  }
+
+  function choosePlanRecipe(day, slot) {
+    const recipes = S.getRecipes().slice().sort((a, b) => a.name.localeCompare(b.name));
+    openModal(`
+      <div class="mh"><h3>${day} · ${esc(slot)}</h3><button class="icon-btn" data-action="close">✕</button></div>
+      <div class="rlist">
+        <button class="btn ghost block" data-action="set-plan" data-day="${day}" data-slot="${esc(slot)}" data-rid="">– leeren –</button>
+        ${recipes.map(r => `<button class="btn ghost block" style="justify-content:space-between" data-action="set-plan" data-day="${day}" data-slot="${esc(slot)}" data-rid="${r.id}">
+          <span>${esc(r.name)}</span><span class="faint small">${r0(r.kcal)} kcal</span></button>`).join("")}
+      </div>`);
+  }
+  document.addEventListener("click", (e) => {
+    const el = e.target.closest('[data-action="set-plan"]'); if (!el) return;
+    S.setPlan(el.dataset.day, el.dataset.slot, el.dataset.rid || null);
+    closeModal(); renderPlan();
+  });
+
+  function collectIngredients() {
+    const plan = S.getPlan(); const agg = {};
+    WEEKDAYS.forEach(day => Object.values(plan[day] || {}).forEach(rid => {
+      const r = S.getRecipe(rid); if (!r) return;
+      (r.ingredients || []).forEach(i => {
+        const key = i.name.toLowerCase();
+        if (!agg[key]) agg[key] = { name: i.name, amount: 0, unit: i.unit || "" };
+        agg[key].amount += (+i.amount || 0);
+      });
+    }));
+    return Object.values(agg);
+  }
+  function generateShopping() {
+    const needed = collectIngredients().filter(i => !isStaple(i.name) && !S.getPantry().some(p => overlaps(p.name, i.name)));
+    if (!needed.length) { alert("Nichts zu kaufen – entweder ist der Plan leer oder du hast alles im Vorrat. 🎉"); return; }
+    S.setShopping(needed.map(i => ({ id: S.uid(), name: i.name, amount: i.amount || null, unit: i.unit, checked: false })));
+  }
+  function addMissingToShopping(id) {
+    const r = S.getRecipe(id); if (!r) return;
+    const miss = missingIngredients(r);
+    const cur = S.getShopping();
+    miss.forEach(name => {
+      const ing = r.ingredients.find(i => i.name === name);
+      if (!cur.some(c => c.name.toLowerCase() === name.toLowerCase()))
+        S.addShopping({ name, amount: ing ? ing.amount : null, unit: ing ? ing.unit : "" });
+    });
+  }
+
+  function saveProfile() {
+    const num = (sel) => +$(sel, app).value || 0;
+    S.saveSettings({
+      weight_current: num("#p-wc"), weight_goal: num("#p-wg"), height_cm: num("#p-h"),
+      kcal_train: num("#p-kt"), protein_train: num("#p-pt"), carbs_train: num("#p-ct"), fat_train: num("#p-ft"),
+      kcal_rest: num("#p-kr"), protein_rest: num("#p-pr"), carbs_rest: num("#p-cr"), fat_rest: num("#p-fr"),
+    });
+    closeModal(); render();
+  }
+  function saveWeight() {
+    const kg = +$("#wl-kg", app).value || 0; if (!kg) return;
+    S.addWeight({ date: todayISO(), weight_kg: kg });
+    S.saveSettings({ weight_current: kg });
+    closeModal(); render();
+  }
+
+  function doExport() {
+    const blob = new Blob([S.exportJSON()], { type: "application/json" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url; a.download = `ernaehrung-backup-${todayISO()}.json`; a.click();
+    URL.revokeObjectURL(url);
+  }
+  function doImport() {
+    const inp = document.createElement("input"); inp.type = "file"; inp.accept = "application/json";
+    inp.onchange = () => {
+      const file = inp.files[0]; if (!file) return;
+      const fr = new FileReader();
+      fr.onload = () => { try { S.importJSON(fr.result); closeModal(); render(); alert("Backup importiert."); } catch (e) { alert("Datei konnte nicht gelesen werden."); } };
+      fr.readAsText(file);
+    };
+    inp.click();
+  }
+
+  // ---------- Start ----------
+  render();
+})();

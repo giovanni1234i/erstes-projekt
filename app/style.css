@@ -1,0 +1,176 @@
+/* =====================================================================
+ *  Ernährungs-App · Design (angelehnt ans Whoop-Dashboard)
+ *  Cool slate + Indigo (Akzent) + Gold · Light/Dark · Mobile-first
+ * ===================================================================== */
+:root{
+  --font: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --mono: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, Consolas, monospace;
+
+  --bg:#eef1f7; --surface:#fff; --surface-2:#f4f6fb; --inset:#eef1f8;
+  --border:#dce1ee; --border-strong:#c9d0e2;
+  --ink:#141a28; --muted:#525d78; --faint:#8b93aa;
+  --accent:#3f5fe0; --accent-ink:#3552cf; --accent-soft:#e7ecfd;
+  --gold:#c98a17;
+  --good:#12945a; --warn:#c68a08; --bad:#dd3b32;
+  --shadow:0 1px 2px rgba(20,26,40,.06), 0 8px 24px rgba(20,26,40,.05);
+  --nav-h:64px;
+}
+@media (prefers-color-scheme: dark){
+  :root{
+    --bg:#0d111c; --surface:#151b2b; --surface-2:#1a2133; --inset:#10151f;
+    --border:#273047; --border-strong:#334063;
+    --ink:#eef1f8; --muted:#9aa4bd; --faint:#6a7492;
+    --accent:#7089ff; --accent-ink:#8ea1ff; --accent-soft:#1c2542;
+    --gold:#e6ad48;
+    --good:#26b26e; --warn:#e6b12f; --bad:#f0655c;
+    --shadow:0 1px 2px rgba(0,0,0,.4), 0 12px 32px rgba(0,0,0,.35);
+  }
+}
+:root[data-theme="light"]{ color-scheme:light;
+  --bg:#eef1f7; --surface:#fff; --surface-2:#f4f6fb; --inset:#eef1f8;
+  --border:#dce1ee; --border-strong:#c9d0e2; --ink:#141a28; --muted:#525d78; --faint:#8b93aa;
+  --accent:#3f5fe0; --accent-ink:#3552cf; --accent-soft:#e7ecfd; --gold:#c98a17;
+  --good:#12945a; --warn:#c68a08; --bad:#dd3b32; }
+:root[data-theme="dark"]{ color-scheme:dark;
+  --bg:#0d111c; --surface:#151b2b; --surface-2:#1a2133; --inset:#10151f;
+  --border:#273047; --border-strong:#334063; --ink:#eef1f8; --muted:#9aa4bd; --faint:#6a7492;
+  --accent:#7089ff; --accent-ink:#8ea1ff; --accent-soft:#1c2542; --gold:#e6ad48;
+  --good:#26b26e; --warn:#e6b12f; --bad:#f0655c; }
+
+*{box-sizing:border-box}
+html,body{margin:0}
+body{
+  background:var(--bg); color:var(--ink); font-family:var(--font);
+  line-height:1.45; -webkit-font-smoothing:antialiased;
+  padding-bottom:calc(var(--nav-h) + env(safe-area-inset-bottom, 0px));
+}
+button{font-family:inherit}
+:focus-visible{outline:2px solid var(--accent); outline-offset:2px; border-radius:8px}
+
+/* ---- App-Shell ---- */
+.app{max-width:640px; margin:0 auto; padding:0 14px}
+header.top{
+  position:sticky; top:0; z-index:20; background:color-mix(in srgb,var(--bg) 88%, transparent);
+  backdrop-filter:blur(10px); display:flex; align-items:center; justify-content:space-between;
+  padding:14px 2px 10px; margin:0 -2px 6px;
+}
+header.top h1{font-size:19px; font-weight:800; letter-spacing:-.02em; margin:0}
+header.top .sub{font:600 11px var(--mono); color:var(--faint); letter-spacing:.06em; text-transform:uppercase}
+.icon-btn{background:var(--surface); border:1px solid var(--border); color:var(--ink);
+  width:38px; height:38px; border-radius:11px; font-size:17px; cursor:pointer; box-shadow:var(--shadow)}
+
+/* ---- Cards ---- */
+.card{background:var(--surface); border:1px solid var(--border); border-radius:14px; box-shadow:var(--shadow); padding:16px; margin-bottom:14px}
+.card h2{font-size:15px; font-weight:700; margin:0 0 12px; letter-spacing:-.01em}
+.row{display:flex; align-items:center; gap:10px}
+.spread{display:flex; align-items:center; justify-content:space-between; gap:10px}
+.muted{color:var(--muted)} .faint{color:var(--faint)}
+.small{font-size:12.5px}
+
+/* ---- Buttons / chips ---- */
+.btn{display:inline-flex; align-items:center; gap:7px; justify-content:center;
+  background:var(--accent); color:#fff; border:none; border-radius:11px; padding:11px 14px;
+  font-size:14px; font-weight:700; cursor:pointer}
+.btn:active{transform:translateY(1px)}
+.btn.ghost{background:var(--surface-2); color:var(--ink); border:1px solid var(--border)}
+.btn.sm{padding:7px 11px; font-size:13px; border-radius:9px}
+.btn.block{width:100%}
+.chip{display:inline-flex; align-items:center; gap:6px; padding:6px 11px; border-radius:999px;
+  border:1px solid var(--border); background:var(--surface-2); color:var(--muted);
+  font:600 12.5px var(--font); cursor:pointer; white-space:nowrap}
+.chip.on{background:var(--accent-soft); border-color:var(--accent); color:var(--accent-ink)}
+.chips{display:flex; gap:8px; flex-wrap:wrap}
+.chips.scroll{flex-wrap:nowrap; overflow-x:auto; padding-bottom:4px; -webkit-overflow-scrolling:touch}
+
+/* ---- Segmented toggle (Trainingstag/Ruhetag) ---- */
+.seg{display:inline-flex; background:var(--inset); border:1px solid var(--border); border-radius:11px; padding:3px; gap:3px}
+.seg button{border:none; background:transparent; color:var(--muted); font:700 13px var(--font);
+  padding:8px 14px; border-radius:8px; cursor:pointer}
+.seg button.on{background:var(--surface); color:var(--ink); box-shadow:var(--shadow)}
+
+/* ---- Progress (kcal/Makro) ---- */
+.rings{display:grid; grid-template-columns:1.2fr 1fr 1fr 1fr; gap:10px; align-items:end}
+@media(max-width:460px){.rings{grid-template-columns:1fr 1fr; }}
+.metric .lab{font:600 10px var(--mono); letter-spacing:.09em; text-transform:uppercase; color:var(--faint)}
+.metric .val{font-size:22px; font-weight:800; letter-spacing:-.02em; font-variant-numeric:tabular-nums; margin-top:2px}
+.metric .val small{font-size:12px; font-weight:600; color:var(--muted)}
+.bar{height:8px; border-radius:99px; background:var(--inset); overflow:hidden; margin-top:8px}
+.bar > i{display:block; height:100%; border-radius:99px; background:var(--accent); transition:width .4s ease}
+.bar.p > i{background:var(--good)} .bar.c > i{background:var(--gold)} .bar.f > i{background:var(--bad)}
+.over > i{background:var(--warn)!important}
+
+/* ---- Meal list ---- */
+.slot{margin-bottom:12px}
+.slot .slot-h{display:flex; align-items:center; justify-content:space-between; margin-bottom:6px}
+.slot .slot-h .name{font:700 12px var(--mono); letter-spacing:.06em; text-transform:uppercase; color:var(--faint)}
+.item{display:flex; align-items:center; justify-content:space-between; gap:10px;
+  background:var(--surface-2); border:1px solid var(--border); border-radius:10px; padding:9px 11px; margin-bottom:6px}
+.item .n{font-weight:600; font-size:14px}
+.item .k{font:700 13px var(--mono); font-variant-numeric:tabular-nums; color:var(--muted); white-space:nowrap}
+.item .x{background:none; border:none; color:var(--faint); font-size:16px; cursor:pointer; padding:2px 4px}
+
+/* ---- Recipe cards ---- */
+.rlist{display:flex; flex-direction:column; gap:10px}
+.recipe{background:var(--surface); border:1px solid var(--border); border-radius:12px; padding:13px; box-shadow:var(--shadow)}
+.recipe .rh{display:flex; align-items:flex-start; justify-content:space-between; gap:10px}
+.recipe .title{font-weight:700; font-size:15px}
+.recipe .macros{font:600 12px var(--mono); color:var(--muted); font-variant-numeric:tabular-nums; margin-top:3px}
+.recipe .tags{margin-top:9px}
+.tag{display:inline-block; font:600 11px var(--mono); padding:3px 8px; border-radius:6px; background:var(--inset); color:var(--muted); margin:0 5px 5px 0}
+.tag.kein{background:color-mix(in srgb,var(--accent) 14%,transparent); color:var(--accent-ink)}
+.tag.grill{background:color-mix(in srgb,var(--gold) 16%,transparent); color:var(--gold)}
+.tag.can{background:color-mix(in srgb,var(--good) 15%,transparent); color:var(--good)}
+.recipe .acts{display:flex; gap:8px; margin-top:11px; flex-wrap:wrap}
+.fav{background:none;border:none;cursor:pointer;font-size:18px;line-height:1;color:var(--faint)}
+.fav.on{color:var(--gold)}
+
+/* ---- Plan grid ---- */
+.plan-scroll{overflow-x:auto}
+table.plan{border-collapse:collapse; width:100%; min-width:560px; font-size:12.5px}
+table.plan th,table.plan td{border:1px solid var(--border); padding:6px; vertical-align:top; text-align:left}
+table.plan th{background:var(--surface-2); font:700 11px var(--mono); text-transform:uppercase; color:var(--faint); position:sticky; left:0}
+table.plan .cell{min-height:34px; cursor:pointer; color:var(--muted)}
+table.plan .cell.set{color:var(--ink); font-weight:600}
+
+/* ---- Shopping ---- */
+.shop-item{display:flex; align-items:center; gap:11px; padding:10px 4px; border-bottom:1px solid var(--border)}
+.shop-item:last-child{border-bottom:none}
+.shop-item input{width:20px; height:20px; accent-color:var(--accent)}
+.shop-item.done label{text-decoration:line-through; color:var(--faint)}
+.shop-item label{flex:1; font-size:14px}
+.shop-item .amt{font:600 12px var(--mono); color:var(--muted)}
+
+/* ---- Inputs ---- */
+input[type=text],input[type=number],input[type=date],select,textarea{
+  width:100%; background:var(--inset); border:1px solid var(--border); color:var(--ink);
+  border-radius:10px; padding:11px 12px; font-size:15px; font-family:inherit}
+label.field{display:block; margin-bottom:12px}
+label.field .l{font:600 12px var(--mono); letter-spacing:.05em; text-transform:uppercase; color:var(--faint); display:block; margin-bottom:6px}
+.grid2{display:grid; grid-template-columns:1fr 1fr; gap:12px}
+
+/* ---- Bottom nav ---- */
+nav.tabs{
+  position:fixed; left:0; right:0; bottom:0; z-index:30; height:calc(var(--nav-h) + env(safe-area-inset-bottom,0px));
+  padding-bottom:env(safe-area-inset-bottom,0px);
+  background:color-mix(in srgb,var(--surface) 92%, transparent); backdrop-filter:blur(12px);
+  border-top:1px solid var(--border); display:flex; justify-content:space-around; align-items:stretch;
+}
+nav.tabs button{flex:1; background:none; border:none; color:var(--faint); cursor:pointer;
+  display:flex; flex-direction:column; align-items:center; justify-content:center; gap:3px; font:600 10.5px var(--font)}
+nav.tabs button .ic{font-size:19px; line-height:1}
+nav.tabs button.on{color:var(--accent)}
+
+/* ---- Modal ---- */
+.overlay{position:fixed; inset:0; z-index:50; background:rgba(8,11,18,.55); display:flex; align-items:flex-end; justify-content:center}
+@media(min-width:520px){.overlay{align-items:center}}
+.modal{background:var(--surface); width:100%; max-width:560px; border-radius:18px 18px 0 0; padding:18px;
+  max-height:88vh; overflow-y:auto; box-shadow:var(--shadow)}
+@media(min-width:520px){.modal{border-radius:16px}}
+.modal h3{margin:0 0 14px; font-size:17px; font-weight:800}
+.modal .mh{display:flex; align-items:center; justify-content:space-between; margin-bottom:14px}
+
+/* ---- Banner ---- */
+.banner{background:var(--accent-soft); border:1px solid color-mix(in srgb,var(--accent) 30%,transparent);
+  color:var(--accent-ink); border-radius:12px; padding:11px 13px; font-size:13px; margin-bottom:14px}
+.hint{font-size:12.5px; color:var(--faint); margin-top:8px}
+.empty{text-align:center; color:var(--faint); padding:26px 10px; font-size:14px}

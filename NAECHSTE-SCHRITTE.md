@@ -55,6 +55,24 @@ Recovery-Punkte. Zurück auf 8.5 h ≈ **+17 Recovery-Punkte**. Hypothese
 
 ---
 
+## 1b. Profil Meier G. (beantwortet 26.07.2026)
+
+| Punkt | Antwort |
+|---|---|
+| Gewicht / Ziel / Grösse | 81 kg → 85 kg · 190 cm · 19 J |
+| Kalorien | an Trainingstagen mehr (Ruhetag ~3200, Trainingstag ~3900) |
+| Lieblingsessen | Pasta, Reis, Lachs, viel Grill im Sommer |
+| No-Gos | eher kein Gemüse-Esser |
+| Küche | Backofen, Herd, Mixer |
+| Kochzeit werktags | 30–40 Min ok |
+| Supplements | Whey + Kreatin |
+| Einkauf | Migros/Coop, Wocheneinkauf, eher sparsam |
+| „Kein Appetit"-Modus | ja (Schnellfilter flüssig/leicht) |
+
+**Kalorien-Begründung (TDEE):** Grundumsatz ~1'900 kcal; Ruhetag ~×1.6 →
+~3'050 + Aufbau-Überschuss ≈ **3'200 kcal**; Trainingstag ~×2.0 → ~3'800 +
+Überschuss ≈ **3'900 kcal**. Schnitt ~3'550 → ~+0.3–0.4 kg/Woche.
+
 ## 2. Die neue Ernährungs-App – schon entschieden
 
 | Punkt | Entscheidung |
@@ -109,16 +127,21 @@ Sync an, sobald die Keys da sind.
 
 ---
 
-## 5. Geplanter Bauplan (Phasen)
+## 5. Bauplan (Phasen)
 
-- **Phase 1 – Gerüst & Kern (lokal lauffähig):** Vorrat-Verwaltung,
-  Rezept-/Nährwert-Datenmodell, Menü-Vorschläge aus Vorrat + Lust,
-  Tages-Log mit kcal/Makro-Zähler gegen dein Ziel. Speichert erst lokal.
-- **Phase 2 – Supabase:** Login, Datenbank, Echtzeit-Sync über Geräte (sobald Keys da).
-- **Phase 3 – Menüplan & Einkauf:** Wochenplan an deinen Trainingszeiten,
-  Meal-Prep-Liste (So ~60 Min), automatische Einkaufsliste (Vorrat vs. Plan).
-- **Phase 4 – Deploy:** Als private Web-App hosten → dein Handy-Link,
-  Homescreen-fähig, offline-tauglich.
+- **✅ Phase 1 – Gerüst & Kern (lokal lauffähig):** ERLEDIGT. Liegt in
+  [`app/`](app/README.md). Vorrat, Rezepte (auf deine Vorlieben zugeschnitten),
+  Menü-Vorschläge + „kochbar mit Vorrat", Tages-Log mit kcal/Makro-Zähler,
+  Wochen-Menüplan, automatische Einkaufsliste, Profil/Ziele, Backup. Läuft
+  lokal (localStorage), Light/Dark, Handy-tauglich.
+  Start: `cd app && python3 -m http.server 8000` → http://localhost:8000
+- **⏳ Phase 2 – Supabase:** Login + Echtzeit-Sync über Geräte. Wartet nur auf
+  deine Zugangsdaten (Abschnitt 4). Danach wird `app/store.js` auf Supabase
+  umgestellt – der Rest der App bleibt gleich.
+- **Phase 3 – Feinschliff:** Menüplan an deine Trainingszeiten koppeln,
+  Meal-Prep-Liste (So ~60 Min), Rezepte-Editor, mehr Nährwerte.
+- **Phase 4 – Deploy:** als private Web-App hosten (Vercel) → dein Handy-Link,
+  Homescreen- und offline-fähig.
 
 **Geplanter Stack:** schlanke Single-Page-App (HTML/JS) · Supabase-JS-Client ·
 Deploy auf Vercel · Nährwerte aus einer eingebauten Lebensmittel-Tabelle
