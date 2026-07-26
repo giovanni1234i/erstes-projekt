@@ -228,9 +228,9 @@
     // Sortierung: kochbar zuerst, dann Favoriten
     recipes.sort((a, b) => (a.miss.length - b.miss.length) || (b.r.is_favorite - a.r.is_favorite));
 
-    const allTags = ["frühstück", "pancakes", "pasta", "reis", "bowl", "asia", "curry", "fleisch", "fisch",
-      "kartoffel", "auflauf", "grill", "wrap", "sandwich", "pizza", "eintopf", "shake", "snack", "dessert",
-      "lachs", "high-protein", "meal-prep", "schnell", "günstig"];
+    const allTags = ["frühstück", "to-go", "pancakes", "pasta", "italienisch", "reis", "bowl", "asia", "curry",
+      "mexikanisch", "fleisch", "fisch", "kartoffel", "auflauf", "grill", "wrap", "sandwich", "pizza", "eintopf",
+      "shake", "snack", "dessert", "post-workout", "budget", "lachs", "high-protein", "meal-prep", "schnell", "günstig"];
     const tagChips = allTags.map(t =>
       `<button class="chip ${rf.tag === t ? "on" : ""}" data-action="filter-tag" data-tag="${t}">${t}</button>`).join("");
 
