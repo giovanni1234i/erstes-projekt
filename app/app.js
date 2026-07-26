@@ -171,6 +171,16 @@
       }
     }
 
+    // Schlaf-Ziel für den Wochentag
+    const wd = new Date(date + "T00:00:00").getDay();
+    const sp = (D.sleepPlan || {})[wd];
+    const sleepCard = sp ? `<div class="card" style="padding:14px 16px">
+        <div class="card-note">Schlaf-Ziel${date === todayISO() ? " heute" : ""}</div>
+        <div style="font-weight:750; font-size:17px; margin-top:3px">🌙 ${sp.bett} → ${sp.auf}
+          <span class="muted" style="font-weight:600; font-size:13px">· ${sp.h} h</span></div>
+        <div class="hint" style="margin-top:8px">${sp.note}</div>
+      </div>` : "";
+
     view.innerHTML = weighCard + recCard + `
       <div class="card">
         <div class="spread" style="margin-bottom:14px">
@@ -199,6 +209,8 @@
           ? `Noch <b>${r0(restKcal)} kcal</b> bis zum Ziel.`
           : `Ziel erreicht (+${r0(-restKcal)} kcal). 💪`}</div>
       </div>
+
+      ${sleepCard}
 
       <div class="card">
         <div class="spread"><h2 style="margin:0">Mahlzeiten</h2>

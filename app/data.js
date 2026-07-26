@@ -16,6 +16,18 @@ window.NUTRI_DATA = {
   // ---- Mahlzeiten-Slots (6 kleine statt 3 grosse) ----
   slots: ["Frühstück", "Snack 1", "Mittag", "Snack 2", "Abend", "Shake"],
 
+  // ---- Schlaf-Ziel pro Wochentag (0=So … 6=Sa) ----
+  // Wunsch: unter der Woche 22:00–07:30 (9.5 h). Wochenende etwas später.
+  sleepPlan: {
+    1: { bett: "22:00", auf: "07:30", h: 9.5, note: "Ziel 22:00–07:30. Handy 30 Min vorher weg, kein Koffein nach ~14:00." },
+    2: { bett: "22:00", auf: "07:30", h: 9.5, note: "Ziel 22:00–07:30. Handy 30 Min vorher weg, kein Koffein nach ~14:00." },
+    3: { bett: "22:00", auf: "07:30", h: 9.5, note: "Ziel 22:00–07:30. Handy 30 Min vorher weg, kein Koffein nach ~14:00." },
+    4: { bett: "22:00", auf: "07:30", h: 9.5, note: "Ziel 22:00–07:30. Handy 30 Min vorher weg, kein Koffein nach ~14:00." },
+    5: { bett: "22:00", auf: "07:30", h: 9.5, note: "Ziel 22:00–07:30. Handy 30 Min vorher weg, kein Koffein nach ~14:00." },
+    6: { bett: "23:00", auf: "08:00", h: 9.0, note: "Wochenende – etwas ausschlafen ok, aber den Rhythmus grob halten." },
+    0: { bett: "23:00", auf: "08:00", h: 9.0, note: "Wochenende – etwas ausschlafen ok, aber den Rhythmus grob halten." },
+  },
+
   // ---- Vorgeschlagener Preseason-Wochenplan (KW31) ----
   // An 21:00-Slot-Tagen (Mo/Mi/Fr) steht im Snack-2-Slot der koffeinfreie
   // Pre-Slot-Boost statt eines Energy Drinks. Werte = Rezeptnamen.
