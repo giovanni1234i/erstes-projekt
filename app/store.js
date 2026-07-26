@@ -36,11 +36,22 @@ window.Store = (function () {
     try {
       const raw = localStorage.getItem(KEY);
       if (!raw) { const s = blank(); try { localStorage.setItem(KEY, JSON.stringify(s)); } catch (e) {} return s; }
-      return Object.assign(blank(), JSON.parse(raw)); // sanfte Migration
+      return mergeSeeds(Object.assign(blank(), JSON.parse(raw))); // sanfte Migration + neue Seeds
     } catch (e) {
       console.warn("Store: konnte nicht laden, starte frisch.", e);
       const s = blank(); try { localStorage.setItem(KEY, JSON.stringify(s)); } catch (e2) {} return s;
     }
+  }
+  // Fügt neu hinzugekommene Seed-Rezepte/-Lebensmittel (aus data.js / recipes-extra.js)
+  // zu vorhandenem Stand hinzu, ohne eigene Einträge zu überschreiben.
+  function mergeSeeds(s) {
+    if (!Array.isArray(s.recipes)) s.recipes = [];
+    if (!Array.isArray(s.foods)) s.foods = [];
+    const haveR = new Set(s.recipes.map(r => (r.name || "").toLowerCase()));
+    D.recipes.forEach(r => { if (!haveR.has(r.name.toLowerCase())) s.recipes.push({ id: uid(), ...r }); });
+    const haveF = new Set(s.foods.map(f => (f.name || "").toLowerCase()));
+    D.foods.forEach(f => { if (!haveF.has(f.name.toLowerCase())) s.foods.push({ id: uid(), ...f }); });
+    return s;
   }
   // Persistiert nach jeder lokalen Änderung + benachrichtigt Sync (notify).
   function persist(notify) {
