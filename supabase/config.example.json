@@ -1,0 +1,5 @@
+{
+  "_hinweis": "Kopie als config.local.json anlegen und echte Werte eintragen. config.local.json wird NICHT ins Repo gepusht (.gitignore). Nur der anon public key gehört hier rein - niemals der service_role-Key.",
+  "SUPABASE_URL": "https://DEIN-PROJEKT.supabase.co",
+  "SUPABASE_ANON_KEY": "dein-anon-public-key-hier"
+}

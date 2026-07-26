@@ -1,0 +1,16 @@
+# Echte Supabase-Zugangsdaten NIE committen
+supabase/config.local.json
+.env
+.env.local
+
+# Persönliche Gesundheitsdaten (Whoop-Rohdaten, Exporte)
+*.whoop.csv
+whoop-export/
+physiological_cycles.csv
+sleeps.csv
+workouts.csv
+journal_entries.csv
+
+# OS / Editor
+.DS_Store
+node_modules/
