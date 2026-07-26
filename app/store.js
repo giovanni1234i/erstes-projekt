@@ -17,6 +17,7 @@ window.Store = (function () {
     plan: {},                   // { "Mo".."So": { slot: recipeId } }
     shopping: [],               // [{id,name,amount,unit,checked}]
     weight: [],                 // [{id,date,weight_kg,appetite,sleep_h,notes}]
+    whoop: [],                  // [{date,sleep_h,recovery,strain}] (aus CSV-Import)
   });
 
   function uid() {
@@ -120,6 +121,11 @@ window.Store = (function () {
     // Weight
     getWeight: () => state.weight,
     addWeight: (w) => { state.weight.push({ id: uid(), ...w }); persist(); },
+
+    // Whoop
+    getWhoop: () => state.whoop || [],
+    setWhoop: (list) => { state.whoop = list; persist(); },
+    whoopFor: (date) => (state.whoop || []).find(w => w.date === date) || null,
 
     // Backup
     exportJSON: () => JSON.stringify(state, null, 2),

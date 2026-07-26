@@ -16,6 +16,19 @@ window.NUTRI_DATA = {
   // ---- Mahlzeiten-Slots (6 kleine statt 3 grosse) ----
   slots: ["Frühstück", "Snack 1", "Mittag", "Snack 2", "Abend", "Shake"],
 
+  // ---- Vorgeschlagener Preseason-Wochenplan (KW31) ----
+  // An 21:00-Slot-Tagen (Mo/Mi/Fr) steht im Snack-2-Slot der koffeinfreie
+  // Pre-Slot-Boost statt eines Energy Drinks. Werte = Rezeptnamen.
+  weekPlan: {
+    "Mo": { "Frühstück":"Brot mit Hüttenkäse", "Snack 1":"Quark-Bowl", "Mittag":"Safran-Risotto mit Poulet", "Snack 2":"Pre-Slot-Boost (koffeinfrei)", "Abend":"Pasta mit Fleischstück", "Shake":"Gainer-Shake" },
+    "Di": { "Frühstück":"Power Oats", "Snack 1":"Wrap mit Ei & Käse", "Mittag":"Hähnchen-Reisbowl", "Snack 2":"Quark-Bowl", "Abend":"Lachs mit Reis", "Shake":"Bananen-Beeren-Shake" },
+    "Mi": { "Frühstück":"Overnight Oats to go", "Snack 1":"Quark-Bowl", "Mittag":"Pasta Pesto mit Poulet", "Snack 2":"Pre-Slot-Boost (koffeinfrei)", "Abend":"Süsskartoffel + Hackfleisch", "Shake":"Gainer-Shake" },
+    "Do": { "Frühstück":"Brot mit Hüttenkäse", "Snack 1":"Wrap mit Ei & Käse", "Mittag":"Thunfisch-Pasta", "Snack 2":"Quark-Bowl", "Abend":"Grill: Poulet + Kartoffeln", "Shake":"Bananen-Beeren-Shake" },
+    "Fr": { "Frühstück":"Power Oats", "Snack 1":"Quark-Bowl", "Mittag":"Hähnchen-Reisbowl", "Snack 2":"Pre-Slot-Boost (koffeinfrei)", "Abend":"Hackfleisch-Pasta (Bolo)", "Shake":"Gainer-Shake" },
+    "Sa": { "Frühstück":"Brot mit Hüttenkäse", "Snack 1":"Wrap mit Ei & Käse", "Mittag":"Grill: Lachs + Reis", "Snack 2":"Quark-Bowl", "Abend":"Pasta mit Fleischstück", "Shake":"Gainer-Shake" },
+    "So": { "Frühstück":"Overnight Oats to go", "Snack 1":"Quark-Bowl", "Mittag":"Safran-Risotto mit Poulet", "Snack 2":"Bananen-Beeren-Shake", "Abend":"Lachs mit Reis", "Shake":"Gainer-Shake" },
+  },
+
   // ---- Häufige Zutaten zum Anhäkeln (Vorrat) ----
   pantryQuickPick: [
     "Haferflocken","Milch","Magerquark","Hüttenkäse","Griechischer Joghurt","Eier",

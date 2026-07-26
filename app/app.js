@@ -78,6 +78,7 @@
     { id: "rezepte", label: "Rezepte", ic: "✦" },
     { id: "plan", label: "Plan", ic: "▦" },
     { id: "einkauf", label: "Einkauf", ic: "▣" },
+    { id: "recovery", label: "Recovery", ic: "❤" },
   ];
   function renderTabs() {
     $("#tabs", app).innerHTML = TABS.map(t =>
@@ -123,7 +124,23 @@
 
     const restKcal = target.kcal - tot.kcal;
 
-    view.innerHTML = `
+    // Whoop-Recovery für diesen Tag (falls importiert)
+    const wr = S.whoopFor(date);
+    let recCard = "";
+    if (wr && wr.recovery != null) {
+      const t = wr.recovery >= 67 ? ["good", "🟢", "Gut – heute kannst du Vollgas geben."]
+        : wr.recovery >= 34 ? ["warn", "🟡", "Mittel – solide essen, Schlaf heute priorisieren."]
+        : ["bad", "🔴", "Tief – gut essen zur Erholung, eher ruhiger, früh ins Bett."];
+      recCard = `<div class="card" style="padding:12px 14px">
+        <div class="spread">
+          <span class="small"><b style="color:var(--${t[0]})">${t[1]} Recovery ${r0(wr.recovery)}%</b>
+            ${wr.sleep_h != null ? ` · Schlaf ${wr.sleep_h.toFixed(1)} h` : ""} <span class="faint">· Whoop</span></span>
+        </div>
+        <div class="hint" style="margin-top:6px">${t[2]}</div>
+      </div>`;
+    }
+
+    view.innerHTML = recCard + `
       <div class="card">
         <div class="spread" style="margin-bottom:14px">
           <button class="btn sm ghost" data-action="date" data-d="-1">‹</button>
@@ -280,8 +297,90 @@
         <h2>Wochen-Menüplan</h2>
         <div class="hint">Tippe eine Zelle, um ein Rezept zu setzen. Danach die Einkaufsliste generieren.</div>
         <div class="plan-scroll" style="margin-top:12px"><table class="plan">${head}${rows}</table></div>
-        <button class="btn block" style="margin-top:14px" data-action="gen-shopping">🛒 Einkaufsliste aus Plan generieren</button>
+        <button class="btn block" style="margin-top:14px" data-action="load-week">🗓 Preseason-Wochenplan laden (Rezept pro Mahlzeit)</button>
+        <button class="btn ghost block" style="margin-top:10px" data-action="gen-shopping">🛒 Einkaufsliste aus Plan generieren</button>
       </div>`;
+  }
+
+  function renderRecovery() {
+    const data = S.getWhoop();
+    if (!data.length) {
+      view.innerHTML = `
+        <div class="card">
+          <h2>Whoop-Daten importieren</h2>
+          <p class="small muted" style="margin-top:0">Exportiere in der Whoop-App: <b>Settings → Account → Data Export</b>.
+            Im ZIP ist die Datei <code>physiological_cycles.csv</code> – die hier laden. Läuft komplett auf deinem Gerät.</p>
+          <button class="btn block" data-action="whoop-import" style="margin-top:12px">📂 CSV wählen</button>
+          <div class="hint">Nur Screenshots? Schick sie im Claude-Chat, dann werte ich sie aus.</div>
+        </div>`;
+      return;
+    }
+    const last = data[data.length - 1];
+    const s14 = Whoop.stats(data, 14);
+    const sAll = Whoop.stats(data);
+    const spark = sparkline(data.slice(-14).map(r => r.recovery).filter(v => v != null));
+    view.innerHTML = `
+      <div class="card">
+        <div class="spread"><h2 style="margin:0">Recovery &amp; Schlaf</h2><span class="card-note">${data.length} Tage · Whoop</span></div>
+        <div class="rings" style="margin-top:12px">
+          ${miniMetric("Letzte Recovery", last.recovery != null ? r0(last.recovery) + " %" : "–", Whoop.tier(last.recovery))}
+          ${miniMetric("Letzter Schlaf", last.sleep_h != null ? last.sleep_h.toFixed(1) + " h" : "–")}
+          ${miniMetric("Ø Recovery 14T", s14.avgRec != null ? r0(s14.avgRec) + " %" : "–")}
+          ${miniMetric("Ø Schlaf 14T", s14.avgSleep != null ? s14.avgSleep.toFixed(1) + " h" : "–")}
+        </div>
+        <div class="card-note" style="margin-top:14px">Recovery – letzte 14 Tage</div>
+        ${spark}
+      </div>
+      <div class="card">
+        <h2>Schlaf → Recovery</h2>
+        ${sAll.r != null
+          ? `<p class="small" style="margin-top:0">Zusammenhang: <b>${sAll.strength(sAll.r)}</b> (r = ${sAll.r >= 0 ? "+" : ""}${sAll.r.toFixed(2)}).
+             Pro Stunde weniger Schlaf ~<b>${Math.abs(r0(sAll.slope))} Recovery-Punkte</b> weniger.</p>`
+          : `<p class="small muted" style="margin-top:0">Noch zu wenig Daten für eine klare Aussage (ideal: ≥ 10–14 Tage).</p>`}
+        <button class="btn ghost sm" data-action="whoop-import" style="margin-top:8px">Neuen Export laden</button>
+      </div>`;
+  }
+
+  function miniMetric(lab, val, tier) {
+    const col = tier === "good" ? "var(--good)" : tier === "mid" ? "var(--warn)" : tier === "low" ? "var(--bad)" : "var(--ink)";
+    return `<div class="metric"><div class="lab">${esc(lab)}</div><div class="val" style="color:${col}; font-size:20px">${val}</div></div>`;
+  }
+  function sparkline(vals) {
+    if (vals.length < 2) return `<div class="hint">Zu wenig Punkte für die Kurve.</div>`;
+    const w = 320, h = 56, pad = 5;
+    const min = Math.min(...vals), max = Math.max(...vals), rng = (max - min) || 1;
+    const pts = vals.map((v, i) => {
+      const x = pad + i / (vals.length - 1) * (w - 2 * pad);
+      const y = h - pad - ((v - min) / rng) * (h - 2 * pad);
+      return x.toFixed(1) + "," + y.toFixed(1);
+    }).join(" ");
+    return `<svg viewBox="0 0 ${w} ${h}" style="width:100%; height:56px" preserveAspectRatio="none">
+      <polyline points="${pts}" fill="none" stroke="var(--accent)" stroke-width="2.4" stroke-linejoin="round" stroke-linecap="round"/></svg>`;
+  }
+  function loadWeekPlan() {
+    const wp = D.weekPlan || {};
+    Object.keys(wp).forEach(day => Object.keys(wp[day]).forEach(slot => {
+      const rec = S.getRecipes().find(r => r.name === wp[day][slot]);
+      S.setPlan(day, slot, rec ? rec.id : null);
+    }));
+  }
+  function doWhoopImport() {
+    const inp = document.createElement("input"); inp.type = "file"; inp.accept = ".csv,text/csv";
+    inp.onchange = () => {
+      const f = inp.files[0]; if (!f) return;
+      const fr = new FileReader();
+      fr.onload = () => {
+        try {
+          const { rows } = Whoop.parse(fr.result);
+          if (!rows.length) { alert("Keine Datenzeilen gefunden."); return; }
+          S.setWhoop(rows);
+          render();
+          alert(rows.length + " Tage aus Whoop importiert.");
+        } catch (e) { alert("Import fehlgeschlagen: " + e.message); }
+      };
+      fr.readAsText(f);
+    };
+    inp.click();
   }
 
   // ====================================================================
@@ -512,7 +611,7 @@
   // ====================================================================
   //  Router
   // ====================================================================
-  const RENDER = { heute: renderHeute, vorrat: renderVorrat, rezepte: renderRezepte, plan: renderPlan, einkauf: renderEinkauf };
+  const RENDER = { heute: renderHeute, vorrat: renderVorrat, rezepte: renderRezepte, plan: renderPlan, einkauf: renderEinkauf, recovery: renderRecovery };
   function render() {
     renderTabs();
     $("#title", app).textContent = TABS.find(t => t.id === state.tab).label;
@@ -576,6 +675,10 @@
       // Plan
       case "plan-cell": choosePlanRecipe(el.dataset.day, el.dataset.slot); break;
       case "gen-shopping": generateShopping(); state.tab = "einkauf"; render(); break;
+      case "load-week": if (confirm("Vorgeschlagenen Preseason-Wochenplan laden? Überschreibt den aktuellen Plan.")) { loadWeekPlan(); renderPlan(); } break;
+
+      // Recovery / Whoop
+      case "whoop-import": doWhoopImport(); break;
 
       // Einkauf
       case "toggle-shop": S.toggleShopping(id); renderEinkauf(); break;

@@ -28,8 +28,9 @@ Auf dem Handy zum Homescreen hinzufügen → verhält sich wie eine App.
 | **Heute** | Trainings-/Ruhetag umschalten, kcal + Protein/Kohlenhydrate/Fett gegen dein Ziel, Mahlzeiten pro Slot loggen, „Kein Appetit?"-Shortcut |
 | **Vorrat** | Häufige Zutaten anhäkeln + Freitext – Basis für „kochbar mit Vorrat" |
 | **Rezepte** | Suche „worauf hast du Lust", Filter (kochbar / Favoriten / kein-Appetit / Tags), Makros, Details, „+ Zu Heute" |
-| **Plan** | Wochen-Menüplan (Mo–So × Slots) |
+| **Plan** | Wochen-Menüplan (Mo–So × Slots) + Knopf „Preseason-Wochenplan laden" (füllt jedem Slot ein Rezept) |
 | **Einkauf** | Automatische Liste aus dem Plan (minus Vorrat) + manuelle Artikel |
+| **Recovery** | Whoop-CSV importieren (`physiological_cycles.csv`) → Schlaf/Recovery/Strain, 14-Tage-Kurve, Korrelation Schlaf→Recovery. Heute-Tab zeigt die Tages-Recovery + Hinweis. |
 | **⚙︎ Profil** | Ziele bearbeiten, wöchentliches Wiegen, Backup (Export/Import) |
 
 ## Daten & Speicher
