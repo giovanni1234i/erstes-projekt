@@ -20,6 +20,18 @@
   `deploy_to_vercel` mit `index.html`, das auf den neuen SHA zeigt.
 - Profil, offene Punkte, Setup: siehe `NAECHSTE-SCHRITTE.md`.
 
+## Aktueller Stand / Präferenzen
+- **Wöchentlicher Check-in** als Routine aktiv (Montag ~08:00 CET/CEST):
+  fragt Gewicht/Recovery/Appetit, passt Plan an. NICHT doppelt anlegen.
+- **Wiege-Erinnerung** in der App (1×/Woche, Heute-Tab, wenn ~7 T kein Eintrag).
+- **Fokus: „Kraft fürs Eis"** – Zunahme soll sich in Kraft/Explosivität übersetzen.
+- Alkohol selten/nie · kein grosser Gemüse-Esser · Treats zweitrangig.
+- **Trainingsplan:** meist gleich; Abstimmung läuft über den Chat (kein eigener
+  App-Tab gewünscht). Sobald der reale Plan da ist: `weekPlan` in `data.js`
+  daran ausrichten (Trainings-/Ruhetage, Timing, 21:00-Slots → Pre-Slot-Boost).
+- **Whoop-Daten bleiben** (localStorage + Supabase nach Login); Deploys löschen
+  keine Nutzerdaten.
+
 ## Datenschutz
 - Repo ist ÖFFENTLICH. Keine echten Geheimnisse committen – nur der Supabase
   **publishable** Key steht im Code (RLS schützt die Daten). Whoop-Rohdaten und
