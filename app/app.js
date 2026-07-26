@@ -228,7 +228,7 @@
     // Sortierung: kochbar zuerst, dann Favoriten
     recipes.sort((a, b) => (a.miss.length - b.miss.length) || (b.r.is_favorite - a.r.is_favorite));
 
-    const allTags = ["frühstück", "pasta", "lachs", "grill", "schnell", "meal-prep", "high-protein"];
+    const allTags = ["frühstück", "pancakes", "pasta", "reis", "lachs", "grill", "shake", "snack", "schnell", "meal-prep", "high-protein"];
     const tagChips = allTags.map(t =>
       `<button class="chip ${rf.tag === t ? "on" : ""}" data-action="filter-tag" data-tag="${t}">${t}</button>`).join("");
 

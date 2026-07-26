@@ -36,7 +36,8 @@ window.NUTRI_DATA = {
     "Hähnchenbrust","Rindshackfleisch","Lachs","Thunfisch (Dose)",
     "Olivenöl","Erdnussbutter","Honig","Banane","Datteln","Beeren (TK)",
     "Whey Protein","Gouda","Mozzarella","Parmesan","Pesto","Passata/Tomatensauce",
-    "Mandeln/Cashew","Avocado","Butter","Rahm",
+    "Mandeln/Cashew","Avocado","Butter","Rahm","Skyr","Speck","Rindssteak",
+    "Granola","Reiswaffeln",
   ],
 
   // ---- Nährwerte-Referenz (Basis wie angegeben) ----
@@ -78,6 +79,11 @@ window.NUTRI_DATA = {
     { name:"Hüttenkäse",             kcal:98,  protein:11,  carbs:3.4,fat:4.3, basis:"100g" },
     { name:"Brot (Scheibe)",         kcal:120, protein:4,   carbs:22, fat:1.5, basis:"Stk" },
     { name:"Parmesan",               kcal:400, protein:36,  carbs:0,  fat:28,  basis:"100g" },
+    { name:"Skyr",                   kcal:63,  protein:11,  carbs:4,  fat:0.2, basis:"100g" },
+    { name:"Speck",                  kcal:400, protein:12,  carbs:0,  fat:40,  basis:"100g" },
+    { name:"Rindssteak",             kcal:220, protein:27,  carbs:0,  fat:12,  basis:"100g" },
+    { name:"Granola",                kcal:450, protein:10,  carbs:65, fat:16,  basis:"100g" },
+    { name:"Reiswaffel",             kcal:30,  protein:0.6, carbs:6.5,fat:0.2, basis:"Stk" },
 
     // --- Getränke (mitzählen – auch Koffein im Blick behalten) ---
     { name:"Energy Drink (250ml)",   kcal:115, protein:0,   carbs:28, fat:0,   basis:"Stk", category:"Getränk" },
@@ -111,7 +117,7 @@ window.NUTRI_DATA = {
       instructions:"Haferflocken mit Milch aufkochen oder over-night einweichen. Banane, Erdnussbutter, Honig unterrühren, Whey erst zum Schluss (nicht kochen)." },
 
     { name:"Gainer-Shake", slot:"Shake", prep_min:3, servings:1, is_favorite:true,
-      tags:["flüssig","kein-appetit","schnell"],
+      tags:["shake","flüssig","kein-appetit","schnell"],
       kcal:400, protein:25, carbs:55, fat:10,
       ingredients:[
         {name:"Milch (vollfett)", amount:400, unit:"ml"},
@@ -123,7 +129,7 @@ window.NUTRI_DATA = {
       instructions:"Alles in den Mixer, glatt mixen. Geht auch bei null Appetit runter – notfalls eine feste Mahlzeit ersetzen." },
 
     { name:"Bananen-Beeren-Shake", slot:"Shake", prep_min:3, servings:1,
-      tags:["flüssig","kein-appetit","schnell"],
+      tags:["shake","flüssig","kein-appetit","schnell"],
       kcal:450, protein:30, carbs:60, fat:10,
       ingredients:[
         {name:"Milch (vollfett)", amount:350, unit:"ml"},
@@ -135,7 +141,7 @@ window.NUTRI_DATA = {
       instructions:"Alles mixen. Frisch und leicht – ideal, wenn nichts Deftiges reingeht." },
 
     { name:"Hähnchen-Reisbowl", slot:"Mittag", prep_min:25, servings:1, is_favorite:true,
-      tags:["high-protein","meal-prep"],
+      tags:["reis","high-protein","meal-prep"],
       kcal:900, protein:60, carbs:100, fat:22,
       ingredients:[
         {name:"Reis (gekocht)", amount:300, unit:"g"},
@@ -147,7 +153,7 @@ window.NUTRI_DATA = {
       instructions:"Hähnchen in Öl anbraten, mit Reis, Mais und Sauce mischen. Perfekt zum Vorkochen (Mo–Do)." },
 
     { name:"Lachs mit Reis", slot:"Abend", prep_min:25, servings:1, is_favorite:true,
-      tags:["lachs","einfach"],
+      tags:["reis","lachs","einfach"],
       kcal:850, protein:45, carbs:85, fat:30,
       ingredients:[
         {name:"Lachs", amount:180, unit:"g"},
@@ -299,5 +305,197 @@ window.NUTRI_DATA = {
         {name:"Kreatin", amount:5, unit:"g"},
       ],
       instructions:"Vor dem 21:00-Slot STATT Energy Drink: schnelle Kohlenhydrate für Power, KEIN Koffein → schützt den Schlaf. Kreatin-Timing ist egal." },
+
+    // ===== Pancakes (mehrere Varianten – tippe 'pancakes' in die Suche) =====
+    { name:"Protein-Pancakes", slot:"Frühstück", prep_min:12, servings:1, is_favorite:true,
+      tags:["pancakes","frühstück","high-protein"],
+      kcal:600, protein:45, carbs:65, fat:15,
+      ingredients:[
+        {name:"Haferflocken", amount:60, unit:"g"},
+        {name:"Whey Protein (Portion)", amount:1, unit:"Stk"},
+        {name:"Ei", amount:2, unit:"Stk"},
+        {name:"Banane", amount:1, unit:"Stk"},
+        {name:"Milch (vollfett)", amount:100, unit:"ml"},
+        {name:"Backpulver", amount:1, unit:"TL"},
+      ],
+      instructions:"Haferflocken fein mixen, alles zu einem Teig verrühren. In der Pfanne kleine Pancakes goldbraun backen. Mit Honig oder Beeren." },
+
+    { name:"Hüttenkäse-Pancakes", slot:"Frühstück", prep_min:12, servings:1,
+      tags:["pancakes","frühstück","high-protein"],
+      kcal:550, protein:40, carbs:50, fat:16,
+      ingredients:[
+        {name:"Hüttenkäse", amount:150, unit:"g"},
+        {name:"Ei", amount:2, unit:"Stk"},
+        {name:"Haferflocken", amount:50, unit:"g"},
+        {name:"Honig", amount:15, unit:"g"},
+      ],
+      instructions:"Alles verrühren (Haferflocken evtl. mahlen), portionsweise ausbacken. Extra saftig durch den Hüttenkäse." },
+
+    { name:"Bananen-Pancakes (3 Zutaten)", slot:"Frühstück", prep_min:8, servings:1,
+      tags:["pancakes","frühstück","schnell"],
+      kcal:500, protein:22, carbs:75, fat:12,
+      ingredients:[
+        {name:"Banane", amount:2, unit:"Stk"},
+        {name:"Ei", amount:2, unit:"Stk"},
+        {name:"Haferflocken", amount:70, unit:"g"},
+      ],
+      instructions:"Banane zerdrücken, mit Ei und Haferflocken mischen, ausbacken. Simpel, wenn's schnell gehen muss." },
+
+    // ===== Weitere Frühstücke =====
+    { name:"Rührei mit Käse & Brot", slot:"Frühstück", prep_min:8, servings:1,
+      tags:["frühstück","schnell","high-protein"],
+      kcal:550, protein:32, carbs:35, fat:30,
+      ingredients:[
+        {name:"Ei", amount:3, unit:"Stk"},
+        {name:"Gouda", amount:30, unit:"g"},
+        {name:"Brot (Scheibe)", amount:2, unit:"Stk"},
+        {name:"Butter", amount:10, unit:"g"},
+      ],
+      instructions:"Rührei mit Käse, dazu Brot. Geht schnell und liefert viel Protein." },
+
+    { name:"Schoko-Protein-Porridge", slot:"Frühstück", prep_min:8, servings:1,
+      tags:["frühstück","high-protein"],
+      kcal:650, protein:40, carbs:80, fat:16,
+      ingredients:[
+        {name:"Haferflocken", amount:90, unit:"g"},
+        {name:"Milch (vollfett)", amount:300, unit:"ml"},
+        {name:"Whey Protein (Portion)", amount:1, unit:"Stk"},
+        {name:"Banane", amount:1, unit:"Stk"},
+        {name:"Kakao", amount:1, unit:"EL"},
+      ],
+      instructions:"Haferflocken mit Milch + Kakao aufkochen, vom Herd Whey einrühren, Banane dazu." },
+
+    // ===== Pasta-Varianten =====
+    { name:"Pasta Carbonara", slot:"Abend", prep_min:20, servings:1,
+      tags:["pasta"],
+      kcal:950, protein:45, carbs:95, fat:40,
+      ingredients:[
+        {name:"Teigwaren (gekocht)", amount:300, unit:"g"},
+        {name:"Speck", amount:80, unit:"g"},
+        {name:"Ei", amount:2, unit:"Stk"},
+        {name:"Parmesan", amount:30, unit:"g"},
+      ],
+      instructions:"Speck knusprig braten, Pasta mit Ei-Parmesan-Masse (nicht kochen!) cremig ziehen." },
+
+    { name:"Poulet-Rahm-Pasta", slot:"Mittag", prep_min:20, servings:1,
+      tags:["pasta","high-protein"],
+      kcal:950, protein:55, carbs:90, fat:38,
+      ingredients:[
+        {name:"Teigwaren (gekocht)", amount:300, unit:"g"},
+        {name:"Hähnchenbrust", amount:180, unit:"g"},
+        {name:"Rahm", amount:100, unit:"ml"},
+        {name:"Parmesan", amount:20, unit:"g"},
+      ],
+      instructions:"Poulet anbraten, mit Rahm köcheln, über die Pasta, Parmesan dazu." },
+
+    // ===== Reis-Bowls =====
+    { name:"Lachs-Teriyaki-Reisbowl", slot:"Mittag", prep_min:25, servings:1,
+      tags:["reis","lachs"],
+      kcal:900, protein:45, carbs:100, fat:28,
+      ingredients:[
+        {name:"Reis (gekocht)", amount:300, unit:"g"},
+        {name:"Lachs", amount:180, unit:"g"},
+        {name:"Sojasauce", amount:20, unit:"ml"},
+        {name:"Honig", amount:15, unit:"g"},
+      ],
+      instructions:"Lachs anbraten, mit Soja+Honig glasieren, auf Reis servieren." },
+
+    { name:"Rind-Reisbowl", slot:"Mittag", prep_min:25, servings:1,
+      tags:["reis","high-protein"],
+      kcal:950, protein:55, carbs:95, fat:30,
+      ingredients:[
+        {name:"Reis (gekocht)", amount:300, unit:"g"},
+        {name:"Rindssteak", amount:180, unit:"g"},
+        {name:"Olivenöl", amount:12, unit:"ml"},
+        {name:"Mais (Dose)", amount:80, unit:"g"},
+      ],
+      instructions:"Steak in Streifen braten, mit Reis und Mais mischen." },
+
+    { name:"One-Pot Hähnchen-Reis", slot:"Abend", prep_min:25, servings:1,
+      tags:["reis","meal-prep","einfach"],
+      kcal:850, protein:55, carbs:90, fat:22,
+      ingredients:[
+        {name:"Reis (gekocht)", amount:300, unit:"g"},
+        {name:"Hähnchenbrust", amount:180, unit:"g"},
+        {name:"Mais (Dose)", amount:80, unit:"g"},
+        {name:"Olivenöl", amount:10, unit:"ml"},
+      ],
+      instructions:"Alles in einer Pfanne – schnell, günstig, perfekt zum Vorkochen." },
+
+    { name:"Ofenkartoffeln mit Quark & Poulet", slot:"Abend", prep_min:30, servings:1,
+      tags:["high-protein","einfach"],
+      kcal:800, protein:55, carbs:75, fat:22,
+      ingredients:[
+        {name:"Kartoffeln", amount:400, unit:"g"},
+        {name:"Magerquark", amount:150, unit:"g"},
+        {name:"Hähnchenbrust", amount:150, unit:"g"},
+        {name:"Olivenöl", amount:10, unit:"ml"},
+      ],
+      instructions:"Kartoffeln im Ofen backen, Poulet dazu braten, mit Quark servieren." },
+
+    // ===== Grill (Sommer) =====
+    { name:"Grill: Rindssteak + Kartoffeln", slot:"Abend", prep_min:35, servings:1,
+      tags:["grill","sommer","high-protein"],
+      kcal:900, protein:60, carbs:65, fat:40,
+      ingredients:[
+        {name:"Rindssteak", amount:200, unit:"g"},
+        {name:"Kartoffeln", amount:400, unit:"g"},
+        {name:"Butter", amount:15, unit:"g"},
+      ],
+      instructions:"Steak grillen (Ruhezeit!), Kartoffeln in Folie auf den Grill." },
+
+    { name:"Grill: Cevapcici + Brot", slot:"Abend", prep_min:25, servings:1,
+      tags:["grill","sommer"],
+      kcal:900, protein:50, carbs:60, fat:45,
+      ingredients:[
+        {name:"Rindshackfleisch", amount:200, unit:"g"},
+        {name:"Brot (Scheibe)", amount:3, unit:"Stk"},
+        {name:"Ajvar", amount:30, unit:"g"},
+      ],
+      instructions:"Hackfleisch würzen, zu Cevapcici formen, grillen. Mit Brot und Ajvar." },
+
+    // ===== Shakes & Snacks =====
+    { name:"Schoko-Erdnuss-Shake", slot:"Shake", prep_min:3, servings:1,
+      tags:["shake","flüssig","kein-appetit","schnell"],
+      kcal:550, protein:35, carbs:55, fat:20,
+      ingredients:[
+        {name:"Milch (vollfett)", amount:400, unit:"ml"},
+        {name:"Whey Protein (Portion)", amount:1, unit:"Stk"},
+        {name:"Erdnussbutter", amount:20, unit:"g"},
+        {name:"Banane", amount:1, unit:"Stk"},
+        {name:"Kakao", amount:1, unit:"EL"},
+      ],
+      instructions:"Alles mixen. Kalorienbombe, die auch bei null Appetit reingeht." },
+
+    { name:"Beeren-Quark-Shake", slot:"Shake", prep_min:3, servings:1,
+      tags:["shake","flüssig","kein-appetit","high-protein"],
+      kcal:400, protein:35, carbs:45, fat:8,
+      ingredients:[
+        {name:"Magerquark", amount:200, unit:"g"},
+        {name:"Milch (vollfett)", amount:200, unit:"ml"},
+        {name:"Beeren (TK)", amount:100, unit:"g"},
+        {name:"Honig", amount:15, unit:"g"},
+      ],
+      instructions:"Mixen – frisch, proteinreich, leicht. Gut für miese Appetit-Tage." },
+
+    { name:"Reiswaffeln mit Erdnussbutter & Banane", slot:"Snack 1", prep_min:3, servings:1,
+      tags:["snack","schnell"],
+      kcal:400, protein:12, carbs:55, fat:16,
+      ingredients:[
+        {name:"Reiswaffel", amount:4, unit:"Stk"},
+        {name:"Erdnussbutter", amount:25, unit:"g"},
+        {name:"Banane", amount:1, unit:"Stk"},
+      ],
+      instructions:"Reiswaffeln mit Erdnussbutter bestreichen, Bananenscheiben drauf." },
+
+    { name:"Skyr mit Granola & Honig", slot:"Snack 2", prep_min:3, servings:1,
+      tags:["snack","high-protein","schnell"],
+      kcal:450, protein:30, carbs:55, fat:10,
+      ingredients:[
+        {name:"Skyr", amount:250, unit:"g"},
+        {name:"Granola", amount:50, unit:"g"},
+        {name:"Honig", amount:15, unit:"g"},
+      ],
+      instructions:"Skyr mit Granola und Honig – schneller Protein-Snack." },
   ],
 };
