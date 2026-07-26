@@ -158,7 +158,20 @@
       </div>`;
     }
 
-    view.innerHTML = recCard + `
+    // Wiege-Erinnerung (1×/Woche) – nur am heutigen Tag, wenn ~7 Tage kein Eintrag
+    let weighCard = "";
+    if (date === todayISO()) {
+      const ws = S.getWeight();
+      const lastW = ws.length ? ws[ws.length - 1] : null;
+      const days = lastW ? Math.floor((Date.now() - new Date(lastW.date + "T00:00:00")) / 86400000) : 999;
+      if (days >= 7) {
+        weighCard = `<div class="card" style="padding:12px 14px; border-color:color-mix(in srgb,var(--accent) 32%,transparent)">
+          <div class="spread"><span class="small">⚖️ <b>Zeit zum Wiegen</b> – morgens, nüchtern${lastW ? ` · zuletzt vor ${days} T` : ""}</span>
+          <button class="btn sm" data-action="profile">Eintragen</button></div></div>`;
+      }
+    }
+
+    view.innerHTML = weighCard + recCard + `
       <div class="card">
         <div class="spread" style="margin-bottom:14px">
           <button class="btn sm ghost" data-action="date" data-d="-1">‹</button>
